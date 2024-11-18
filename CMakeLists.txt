@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project configuration
-project(Tetris LANGUAGES C)
+project(MCWordle LANGUAGES C)
 
 # Set C standard and compile flags
 set(CMAKE_C_STANDARD 11)

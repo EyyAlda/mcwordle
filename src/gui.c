@@ -35,14 +35,18 @@ GtkWidget *create_main_menu(){
     gtk_widget_set_hexpand(GTK_WIDGET(start_button_container), TRUE);
 
     gtk_widget_set_halign(GTK_WIDGET(middle_container), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(middle_container), GTK_ALIGN_FILL);
+    gtk_widget_set_valign(GTK_WIDGET(middle_container), GTK_ALIGN_CENTER);
     gtk_widget_set_hexpand(GTK_WIDGET(middle_container), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(middle_container), TRUE);
 
+    gtk_box_append(GTK_BOX(start_button_container), start_button);
     gtk_box_append(GTK_BOX(middle_container), header_label);
     gtk_box_append(GTK_BOX(middle_container), start_button_container);
 
     gtk_box_append(GTK_BOX(container), overlay);
+
+    gtk_widget_add_css_class(GTK_WIDGET(start_button), "start-button");
+    gtk_widget_add_css_class(GTK_WIDGET(header_label), "header-main-menu");
 
     g_signal_connect(start_button, "clicked", G_CALLBACK(on_start_button_click), NULL);
     g_print("DEBUG: created main menu\n");
@@ -75,6 +79,12 @@ void on_activate(GtkApplication *app, gpointer user_data){
     gtk_stack_add_named(GTK_STACK(app_stack), main_menu, "main-menu");
     gtk_stack_add_named(GTK_STACK(app_stack), game_panel, "game-panel");
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
+
+    /*GtkCssProvider *provider = gtk_css_provider_new();
+
+    gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider), "");
+    g_object_unref(provider);
+    */
 
     gtk_window_set_child(GTK_WINDOW(window), app_stack);
     gtk_window_present(GTK_WINDOW(window));

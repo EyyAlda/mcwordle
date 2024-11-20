@@ -61,20 +61,52 @@ GtkWidget *create_game_panel(){
     GtkWidget *overlay = gtk_overlay_new();
     GtkWidget *background = gtk_picture_new_for_filename("../../Background/background2.webp");
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *item_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GdkPaintable *test_icon = GDK_PAINTABLE(gdk_texture_new_from_filename( "../../Bilder/allay.gif",NULL));
+    GtkWidget *button_icon = gtk_image_new_from_paintable(test_icon);
+    GtkWidget *picture_button = gtk_button_new();
     GtkWidget *end_button = gtk_button_new_with_label("End Game");
+    GtkWidget *version = gtk_button_new_with_label("Version");
+    GtkWidget *hp = gtk_button_new_with_label("HP");
+    GtkWidget *height = gtk_button_new_with_label("Height");
+    GtkWidget *behavior = gtk_button_new_with_label("Behavior");
+    GtkWidget *spawn = gtk_button_new_with_label("Spawn");
+    GtkWidget *class = gtk_button_new_with_label("Class");
     GtkWidget *button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), button_container);
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), item_container);
+    gtk_box_append(GTK_BOX(item_container),picture_button);
+    gtk_box_append(GTK_BOX(item_container),version);
+    gtk_box_append(GTK_BOX(item_container),hp);
+    gtk_box_append(GTK_BOX(item_container),height);
+    gtk_box_append(GTK_BOX(item_container),behavior);
+    gtk_box_append(GTK_BOX(item_container),spawn);
+    gtk_box_append(GTK_BOX(item_container),class);
     gtk_box_append(GTK_BOX(button_container),end_button);
 
     gtk_picture_set_can_shrink(GTK_PICTURE(background), TRUE);
     gtk_widget_set_vexpand(background, TRUE);
     gtk_picture_set_content_fit(GTK_PICTURE(background), GTK_CONTENT_FIT_COVER);
 
+    gtk_button_set_child(GTK_BUTTON(picture_button), button_icon);
     gtk_widget_set_halign(GTK_WIDGET(button_container), GTK_ALIGN_END);
     gtk_widget_set_valign(GTK_WIDGET(button_container), GTK_ALIGN_END);
     gtk_widget_set_hexpand(GTK_WIDGET(button_container), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(button_container), TRUE);
+
+    gtk_widget_set_size_request(button_icon, 110, 110);
+    gtk_widget_set_size_request(version, 110, 110);
+    gtk_widget_set_size_request(hp, 110, 110);
+    gtk_widget_set_size_request(height, 110, 110);
+    gtk_widget_set_size_request(behavior, 110, 110);
+    gtk_widget_set_size_request(spawn, 110, 110);
+    gtk_widget_set_size_request(class, 110, 110);
+    gtk_box_set_homogeneous(GTK_BOX(item_container), TRUE);
+    gtk_widget_set_halign(GTK_WIDGET(item_container), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(item_container), GTK_ALIGN_CENTER);
+    gtk_widget_set_hexpand(GTK_WIDGET(item_container), TRUE);
+    gtk_widget_set_vexpand(GTK_WIDGET(item_container), TRUE);
 
     
     gtk_box_append(GTK_BOX(container), overlay);

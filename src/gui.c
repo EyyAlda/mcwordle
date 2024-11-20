@@ -104,7 +104,8 @@ GtkWidget *create_game_panel(){
     gtk_widget_set_size_request(class, 110, 110);
     gtk_box_set_homogeneous(GTK_BOX(item_container), TRUE);
     gtk_widget_set_halign(GTK_WIDGET(item_container), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(item_container), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(item_container), GTK_ALIGN_START);
+    gtk_widget_set_margin_top(GTK_WIDGET(item_container), 200);
     gtk_widget_set_hexpand(GTK_WIDGET(item_container), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(item_container), TRUE);
 

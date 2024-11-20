@@ -15,11 +15,15 @@ void on_end_button_click(GtkWidget *widget, gpointer user_data){
 GtkWidget *create_main_menu(){
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *overlay = gtk_overlay_new();
-    GtkWidget *background = gtk_picture_new();
+    GtkWidget *background = gtk_picture_new_for_filename("../../Background/download.webp");
     GtkWidget *start_button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *middle_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     GtkWidget *start_button = gtk_button_new_with_label("Start Game");
     GtkWidget *header_label = gtk_label_new("MC Wordle");
+    
+    gtk_picture_set_can_shrink(GTK_PICTURE(background), TRUE);
+    gtk_widget_set_vexpand(background, TRUE);
+    gtk_picture_set_content_fit(GTK_PICTURE(background), GTK_CONTENT_FIT_COVER);
 
     gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), middle_container);
@@ -54,10 +58,26 @@ GtkWidget *create_main_menu(){
 }
 
 GtkWidget *create_game_panel(){
+    GtkWidget *overlay = gtk_overlay_new();
+    GtkWidget *background = gtk_picture_new_for_filename("../../Background/background2.webp");
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *end_button = gtk_button_new_with_label("End Game");
+    GtkWidget *button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), button_container);
+    gtk_box_append(GTK_BOX(button_container),end_button);
+
+    gtk_picture_set_can_shrink(GTK_PICTURE(background), TRUE);
+    gtk_widget_set_vexpand(background, TRUE);
+    gtk_picture_set_content_fit(GTK_PICTURE(background), GTK_CONTENT_FIT_COVER);
+
+    gtk_widget_set_halign(GTK_WIDGET(button_container), GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(button_container), GTK_ALIGN_END);
+    gtk_widget_set_hexpand(GTK_WIDGET(button_container), TRUE);
+    gtk_widget_set_vexpand(GTK_WIDGET(button_container), TRUE);
+
     
-    gtk_box_append(GTK_BOX(container), end_button);
+    gtk_box_append(GTK_BOX(container), overlay);
     g_signal_connect(end_button, "clicked", G_CALLBACK(on_end_button_click), NULL);
 
     g_print("DEBUG: created game panel\n");

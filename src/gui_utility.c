@@ -5,9 +5,13 @@
 
 GtkWidget *mcwordle_create_game_mob_row_view(MinecraftMob *mob_struct){
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+
+    char* health_value = NULL;
+
+    sprintf(health_value, "%d", mob_struct->health);
     
     GtkWidget *mob_icon = gtk_button_new();
-    GtkWidget *health = gtk_button_new_with_label((char *)mob_struct->health);
+    GtkWidget *health = gtk_button_new_with_label(health_value);
     GtkWidget *height = gtk_button_new();
     GtkWidget *version = gtk_button_new();
     GtkWidget *spawn = gtk_button_new();

@@ -4,14 +4,16 @@
 #include <sqlite3.h>
 #include <string.h>
 
-static int sql_callback(void *minecraft_mob_ptr, int argc, char **argv, char **colNames){
+MinecraftMob **mob_ptr;
+
+/*static int sql_callback(void *minecraft_mob_ptr, int argc, char **argv, char **colNames){
 
 
 }
-/**Creates a struct containing all the data for a single minecraft mob
+**Creates a struct containing all the data for a single minecraft mob
  * @param const char *mob_name
  * @param sqlite3 *db
- */
+ *
 MinecraftMob *mcwordle_create_minecraft_mob_item(const char *mob_name, sqlite3 *db, int rc){
     MinecraftMob *mob_item_ptr = (MinecraftMob *)malloc(sizeof(MinecraftMob));
 
@@ -37,6 +39,7 @@ MinecraftMob *mcwordle_create_minecraft_mob_item(const char *mob_name, sqlite3 *
 
     return mob_item_ptr;
 }
+*/
 
 #define MAX_ROWS 82
 #define MAX_COLUMNS 8
@@ -47,28 +50,60 @@ char resultArray[MAX_ROWS][MAX_COLUMNS][MAX_LENGTH];
 
 int rowCounter = 0;
 
+void fill_Mob_struct(int i, char **argv){
+    switch(i){
+        case 0:
+            mob_ptr[rowCounter]->name = argv[i];
+            break;
+        case 1:
+            mob_ptr[rowCounter]->version = argv[i];
+            break;
+        case 2:
+            mob_ptr[rowCounter]->health = atoi(argv[i]);
+            break;
+        case 3:
+            mob_ptr[rowCounter]->height = atof(argv[i]);
+            break;
+        case 4:
+            mob_ptr[rowCounter]->behavior = atoi(argv[i]);
+            break;
+        case 5:
+            mob_ptr[rowCounter]->spawn = argv[i];
+            break;
+        case 6:
+            mob_ptr[rowCounter]->class = atoi(argv[i]);
+            break;
+        case 7:
+            mob_ptr[rowCounter]->picture_path = argv[i];
+            break;
+    }
+}
+
 // Callback-Funktion, um die Ergebnisse zu verarbeiten
 int callback(void *data, int argc, char **argv, char **azColName) {
+    mob_ptr[rowCounter] = (MinecraftMob *)malloc(sizeof(MinecraftMob));
+
     for (int i = 0; i < argc; i++) {
         if (rowCounter < MAX_ROWS && i < MAX_COLUMNS) {
             snprintf(resultArray[rowCounter][i], MAX_LENGTH, "%s", argv[i] ? argv[i] : "NULL");
+            fill_Mob_struct(i, argv);
         }
     }
     rowCounter++;
     return 0;
 }
 
-int array() {
+MinecraftMob **array() {
     sqlite3 *db;
     char *errMsg = 0;
     const char *sql = "SELECT * FROM Mops;"; // SQL-Abfrage
     int rc;
+    rowCounter = 0;
 
     // Datenbank öffnen
     rc = sqlite3_open("../../Minecraft Projekt Minecraft.db", &db);
     if (rc) {
         fprintf(stderr, "Datenbank kann nicht geöffnet werden: %s\n", sqlite3_errmsg(db));
-        return 1;
     } else {
         printf("Datenbank erfolgreich geöffnet.\n");
     }
@@ -93,5 +128,5 @@ int array() {
 
     // Datenbank schließen
     sqlite3_close(db);
-    return 0;
+    return mob_ptr;
 }

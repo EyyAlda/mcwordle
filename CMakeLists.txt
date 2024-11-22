@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME}
 
 # Find GTK4 and GLib using PkgConfig
 find_package(PkgConfig REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 # Platform-specific configuration
 if(WIN32)
@@ -39,6 +40,7 @@ if(WIN32)
         include/
         ${GTK4_INCLUDE_DIRS}
         ${GLIB_INCLUDE_DIRS}
+        
     )
 
     # Link GTK4 and GLib libraries (MSYS2 paths)
@@ -48,6 +50,7 @@ if(WIN32)
         ${GLIB_LIBRARIES}
         # Link Windows-specific libraries
         ws2_32 gdi32 imm32 ole32 shell32 uuid comdlg32
+        SQLite::SQLite3
     )
 else()
     # For Linux and other platforms

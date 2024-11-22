@@ -65,6 +65,7 @@ else()
         PRIVATE
         PkgConfig::GTK4
         PkgConfig::GLIB
+        SQLite::SQLite3
     )
 
     # Include directories for Unix-like systems

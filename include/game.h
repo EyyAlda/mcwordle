@@ -8,6 +8,7 @@ typedef struct {
     int behavior;
     char spawn[100];
     int class;
+    int health;
     char picture_path[100];
 } MinecraftMob;
 

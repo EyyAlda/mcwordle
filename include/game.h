@@ -15,4 +15,8 @@ typedef struct {
 
 
 } MinecraftBlock;
+
+
+int array();
+
 #endif

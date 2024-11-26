@@ -6,4 +6,5 @@ char *return_folders_path();
 int does_file_exist(const char *filepath);
 
 void free_folders_ptr();
+extern char* output;
 #endif

@@ -17,7 +17,16 @@ typedef struct {
 
 } MinecraftBlock;
 
+struct MobDataAccess{
+    MinecraftMob *mob_data_pointer;
+    struct MobDataAccess *next;
+};
 
 int array();
 
+int get_mob_counter();
+
+char ***get_mob_data();
+
+int unref_mob_data();
 #endif

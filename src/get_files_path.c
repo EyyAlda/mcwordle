@@ -20,12 +20,12 @@ int does_file_exist(const char * filepath){
     return (stat(filepath, &buffer) == 0);
 }
 
-char* output;
 
 char* return_folders_path(){
     char command[] = "echo $HOME";
     char buffer[128];
-    //char directory[] = "/myGames/mc_wordle/";
+    char directory[] = "/MCWordle";
+    char* output = NULL;
 
     FILE * pipe = popen(command, "r");
     if (pipe == NULL){
@@ -39,9 +39,9 @@ char* return_folders_path(){
             buffer[i] = '\0';
         }
     }
-    output = (char *)malloc(strlen(buffer) + 1);
 
     strcpy(output, buffer);
+    strcat(output, directory);
     fprintf(stdout, "return_folders_path: %s\n", output);
 
     if (!does_file_exist(output)){
@@ -56,9 +56,9 @@ char* return_folders_path(){
     return output;
 }
 
-void free_folders_ptr(){
+/*void free_folders_ptr(){
     free(output);
-}
+}*/
 
 
 #endif

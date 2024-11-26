@@ -60,3 +60,7 @@ build/
 
 .cache/
 *.db
+
+Background/
+Bilder/
+Block_Pics/

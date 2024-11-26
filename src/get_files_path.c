@@ -15,6 +15,7 @@
 
 #ifdef __unix__
 
+char* output = NULL;
 int does_file_exist(const char * filepath){
     struct stat buffer;
     return (stat(filepath, &buffer) == 0);
@@ -25,7 +26,6 @@ char* return_folders_path(){
     char command[] = "echo $HOME";
     char buffer[128];
     char directory[] = "/MCWordle";
-    char* output = NULL;
 
     FILE * pipe = popen(command, "r");
     if (pipe == NULL){
@@ -40,6 +40,7 @@ char* return_folders_path(){
         }
     }
 
+    output = malloc(sizeof(char *));
     strcpy(output, buffer);
     strcat(output, directory);
     fprintf(stdout, "return_folders_path: %s\n", output);
@@ -56,9 +57,9 @@ char* return_folders_path(){
     return output;
 }
 
-/*void free_folders_ptr(){
+void free_folders_ptr(){
     free(output);
-}*/
+}
 
 
 #endif

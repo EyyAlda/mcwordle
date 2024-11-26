@@ -19,9 +19,22 @@ void on_end_button_click(GtkWidget *widget, gpointer user_data){
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
 }
 GtkWidget *create_main_menu(){
+    fprintf(stdout, "0\n");
+    char *path = return_folders_path();
+    
+
+    char background_path[strlen(path) + strlen("/Background/download.webp") + 1];
+    fprintf(stdout, "1\n");
+    strcpy(background_path, path);
+    fprintf(stdout, "2\n");
+    strcat(background_path, "/Background/download.webp");
+
+    free(path);
+    fprintf(stdout, "DEBUG: Background: %s", background_path);
+
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *overlay = gtk_overlay_new();
-    GtkWidget *background = gtk_picture_new_for_filename("../../Background/download.webp");
+    GtkWidget *background = gtk_picture_new_for_filename(background_path);
     GtkWidget *start_button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *middle_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     GtkWidget *start_button = gtk_button_new_with_label("Start Game");
@@ -102,32 +115,34 @@ static void on_search(GtkEditable *editable, gpointer user_data){
     
 
 
-    //if (gtk_widget_get_first_child(search_results) != NULL) gtk_widget_unparent(gtk_widget_get_first_child(search_results));
+    while (gtk_widget_get_first_child(search_results) != NULL) gtk_widget_unparent(gtk_widget_get_first_child(search_results));
     
 
-    /*if (strlen(text) > 0){
-        GtkWidget *results = create_mob_search_result_list(text);
-        gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(search_results), results);
+    if (strlen(text) > 0){
+        create_mob_search_result_list(search_results, text);
         g_print("DEBUG: loaded search results\n");
     }
-    */
+    
     g_print("text changed: %s\n", text);
 }
 
 GtkWidget *create_game_panel(){
     fprintf(stdout, "0\n");
-    return_folders_path();
-    extern char* output;
-    char *path = strdup(output);
+    char *path = return_folders_path();
+    
 
-    char *background_path = NULL;
+    char background_path[strlen(path) + strlen("/Background/background2.webp") + 1];
     fprintf(stdout, "1\n");
     strcpy(background_path, path);
     fprintf(stdout, "2\n");
-    strcat(background_path, "/MCWordle/Background/background2.webp");
+    strcat(background_path, "/Background/background2.webp");
 
+    free(path);
+    fprintf(stdout, "DEBUG: Background: %s", background_path);
+    
     GtkWidget *overlay = gtk_overlay_new();
     GtkWidget *overlay2 = gtk_overlay_new();
+    GtkWidget *scroll_pane = gtk_scrolled_window_new();
     GtkWidget *background = gtk_picture_new_for_filename(background_path);
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *item_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
@@ -144,17 +159,20 @@ GtkWidget *create_game_panel(){
     //GtkWidget *search_bar = gtk_search_bar_new();
     GtkWidget *search_bar_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *search_entry = gtk_search_entry_new();
-    search_results = gtk_scrolled_window_new();
+    search_results = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     middle_overlay = overlay2;
 
-    //free_folders_ptr();
     gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), item_container);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay2), mop_container);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay2), search_results);
-    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), overlay2);
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), scroll_pane);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), search_bar_container);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), button_container);
+
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll_pane), overlay2);
+
+    gtk_widget_add_css_class(scroll_pane, "scroll-pane");
 
     gtk_box_append(GTK_BOX(item_container),mop_button);
     gtk_box_append(GTK_BOX(item_container),version_button);
@@ -163,6 +181,10 @@ GtkWidget *create_game_panel(){
     gtk_box_append(GTK_BOX(item_container),behavior_button);
     gtk_box_append(GTK_BOX(item_container),spawn_button);
     gtk_box_append(GTK_BOX(item_container),class_button);
+
+    gtk_widget_set_halign(GTK_WIDGET(search_results), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(search_results), GTK_ALIGN_START);
+    gtk_widget_set_margin_top(search_results, 200);
 
     gtk_box_append(GTK_BOX(search_bar_container), search_entry);
     
@@ -207,6 +229,7 @@ GtkWidget *create_game_panel(){
     gtk_widget_set_margin_top(GTK_WIDGET(mop_container), 260);
     gtk_widget_set_hexpand(GTK_WIDGET(mop_container), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(mop_container), TRUE);
+    
 
 
     gtk_box_append(GTK_BOX(container), overlay);
@@ -237,12 +260,22 @@ void on_activate(GtkApplication *app, gpointer user_data){
     gtk_stack_add_named(GTK_STACK(app_stack), main_menu, "main-menu");
     gtk_stack_add_named(GTK_STACK(app_stack), game_panel, "game-panel");
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
+    
+    char *base_path = return_folders_path();
 
-    /*GtkCssProvider *provider = gtk_css_provider_new();
+    char css_path[strlen(base_path) + strlen("/styles.css") + 1];
 
-    gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider), "");
+    strcpy(css_path, base_path);
+    strcat(css_path, "/styles.css");
+    
+    free(base_path);
+
+    GtkCssProvider *provider = gtk_css_provider_new();
+
+    gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider), css_path);
+    
     g_object_unref(provider);
-    */
+    
 
     array();
 

@@ -3,6 +3,7 @@
 #include "../include/game.h"
 #include <sqlite3.h>
 #include <string.h>
+#include "../include/get_files_path.h"
 
 char ***mob_data;
 /*static int sql_callback(void *minecraft_mob_ptr, int argc, char **argv, char **colNames){
@@ -93,6 +94,15 @@ int unref_mob_data(){
 /**Liest die Mobdaten aus der Datenbank und speichert sie
  */
 int array() {
+    char *base_path = return_folders_path();
+
+    char database_path[strlen(base_path) + strlen("/Minecraft Projekt Minecraft.db") + 1];
+
+    strcpy(database_path, base_path);
+    strcat(database_path, "/Minecraft Projekt Minecraft.db");
+
+    free(base_path);
+
     sqlite3 *db;
     char *errMsg = 0;
     const char *sql = "SELECT * FROM Mops;"; // SQL-Abfrage
@@ -100,7 +110,7 @@ int array() {
     rowCounter = 0;
 
     // Datenbank öffnen
-    rc = sqlite3_open("../src/Minecraft Projekt Minecraft.db", &db);
+    rc = sqlite3_open(database_path, &db);
     if (rc) {
         fprintf(stderr, "Datenbank kann nicht geöffnet werden: %s\n", sqlite3_errmsg(db));
     } else {

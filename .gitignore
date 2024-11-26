@@ -64,3 +64,5 @@ build/
 Background/
 Bilder/
 Block_Pics/
+
+*.css

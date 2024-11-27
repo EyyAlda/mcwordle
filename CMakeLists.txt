@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
     src/get_files_path.c
     src/gui.c
     src/game.c
+    src/gui_utility.c
 )
 
 # Find GTK4 and GLib using PkgConfig

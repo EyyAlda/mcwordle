@@ -8,8 +8,6 @@
 GtkWidget *mcwordle_create_game_mob_row_view(char **mob_data){
     if (mob_data == NULL) return NULL;
 
-    GtkWidget *container_container = gtk_button_new();
-
     /** Container Element
      * Beinhaltet mehrere weitere Elemente
      */
@@ -121,20 +119,24 @@ GtkWidget *mcwordle_create_game_mob_row_view(char **mob_data){
     fprintf(stdout, "DEBUG: name\n");
     gtk_button_set_label(GTK_BUTTON(mob_name), mob_data[0]);
     */
-    gtk_button_set_child(GTK_BUTTON(container_container), container);
-    return container_container;
+    //gtk_button_set_child(GTK_BUTTON(container_container), container);
+    return container;
+}
+
+void setup_result(GtkListItemFactory *factory, GtkListItem *list_item){
+
+
+
 }
 
 /**Zählt die Menge an Elementen, die zu einer Box hinzugefügt wurden
  * Wird genutzt, um einen leeren bildschirm zu verhindern falls kein mob mit einem spezifischem Namen gefunden wurde
  * @param GtkWidget *widget
  */
-int count_found_mobs(GtkWidget *widget){
+int count_found_mobs(GtkStringList *widget){
     int count = 0;
-    GtkWidget *child = gtk_widget_get_first_child(widget);
-    while (child != NULL){
+    while (gtk_string_list_get_string(widget, count) != NULL){
         count++;
-        child = gtk_widget_get_next_sibling(child);
     }
     return count;
 }
@@ -144,7 +146,7 @@ int count_found_mobs(GtkWidget *widget){
  * @param GtkWidget *container
  * @param const char *mob_name
  */
-int create_mob_search_result_list(GtkWidget *container, const char *mob_name){
+int create_mob_search_result_list(GtkStringList *container, const char *mob_name){
     int mob_count = get_mob_counter();
 
 
@@ -154,10 +156,12 @@ int create_mob_search_result_list(GtkWidget *container, const char *mob_name){
     fprintf(stdout, "DEBUG: checking pointer\n");
     if (mob_data != NULL){
         for (int i = 0; i < mob_count; i++){
-
+            
+            // vergleiche eingegebenen Namen und vorhandene Daten
             if (g_strstr_len(mob_data[i][0], -1, mob_name)){
 
                 g_print("DEBUG: creating results\n");
+                gtk_string_list_append(container, mob_data[i][0]);
                 //bei jedem treffer wird ein neues Element zur Liste hinzugefügt
                 gtk_box_append(GTK_BOX(container), mcwordle_create_game_mob_row_view(mob_data[i]));
             }
@@ -167,7 +171,6 @@ int create_mob_search_result_list(GtkWidget *container, const char *mob_name){
     //falls die Suche keine treffer ergab, zeige es an
     if (!count_found_mobs(container)){
         GtkWidget *empty_label = gtk_label_new("No result found");
-        gtk_box_append(GTK_BOX(container), empty_label);
     }
 
     return 0;
@@ -175,11 +178,10 @@ int create_mob_search_result_list(GtkWidget *container, const char *mob_name){
 
 /**removes the listed search results
  */
-int destroy_search_results(GtkWidget *parent){
-    GtkWidget *child;
+int destroy_search_results(GtkStringList *parent){
 
-    while ((child = gtk_widget_get_first_child(parent)) != NULL) {
-        gtk_widget_unparent(child);
+    while (gtk_string_list_get_string(parent, 0) != NULL) {
+        gtk_string_list_remove(parent, 0);
     }
     return 0;
 }

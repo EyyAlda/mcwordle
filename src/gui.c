@@ -7,7 +7,7 @@
 
 GtkWidget *app_stack;
 GtkWidget *search_results;
-GtkWidget *middle_overlay;
+GtkStringList *search_result_list;
 
 int is_initialized = 0;
 
@@ -76,7 +76,7 @@ GtkWidget *create_main_menu(){
     return container;
 }
 
-GtkWidget *create_mob_container(){
+/*GtkWidget *create_mob_container(){
     GtkWidget *mop_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     GdkPaintable *test_icon = GDK_PAINTABLE(gdk_texture_new_from_filename( "../../Bilder/allay.gif",NULL));
     GtkWidget *button_icon = gtk_image_new_from_paintable(test_icon);
@@ -108,18 +108,15 @@ GtkWidget *create_mob_container(){
     
     return mop_container;
 }
-
+*/
 
 static void on_search(GtkEditable *editable, gpointer user_data){
     const char *text = gtk_editable_get_text(editable);  
-    
-
-
-    while (gtk_widget_get_first_child(search_results) != NULL) gtk_widget_unparent(gtk_widget_get_first_child(search_results));
-    
+     
+    destroy_search_results(search_result_list);
 
     if (strlen(text) > 0){
-        create_mob_search_result_list(search_results, text);
+        create_mob_search_result_list(search_result_list, text);
         g_print("DEBUG: loaded search results\n");
     }
     
@@ -141,12 +138,11 @@ GtkWidget *create_game_panel(){
     fprintf(stdout, "DEBUG: Background: %s", background_path);
     
     GtkWidget *overlay = gtk_overlay_new();
-    GtkWidget *overlay2 = gtk_overlay_new();
     GtkWidget *scroll_pane = gtk_scrolled_window_new();
     GtkWidget *background = gtk_picture_new_for_filename(background_path);
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *item_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    GtkWidget *mop_container = create_mob_container(); 
+    //GtkWidget *mop_container = create_mob_container(); 
     GtkWidget *end_button = gtk_button_new_with_label("End Game");
     GtkWidget *mop_button = gtk_button_new_with_label("Mop");
     GtkWidget *version_button = gtk_button_new_with_label("Version");
@@ -159,18 +155,15 @@ GtkWidget *create_game_panel(){
     //GtkWidget *search_bar = gtk_search_bar_new();
     GtkWidget *search_bar_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *search_entry = gtk_search_entry_new();
-    search_results = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    middle_overlay = overlay2;
+    search_result_list = gtk_string_list_new(NULL);
 
     gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), item_container);
-    gtk_overlay_add_overlay(GTK_OVERLAY(overlay2), mop_container);
-    gtk_overlay_add_overlay(GTK_OVERLAY(overlay2), search_results);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), scroll_pane);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), search_bar_container);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), button_container);
 
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll_pane), overlay2);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll_pane), GTK_WIDGET(search_result_list));
 
     gtk_widget_add_css_class(scroll_pane, "scroll-pane");
 
@@ -221,15 +214,15 @@ GtkWidget *create_game_panel(){
     gtk_widget_set_margin_top(GTK_WIDGET(search_bar_container), 20);
     gtk_search_entry_set_placeholder_text(GTK_SEARCH_ENTRY(search_entry), "Search for a Mob");
     gtk_search_entry_set_search_delay(GTK_SEARCH_ENTRY(search_entry), search_delay);
-    g_signal_connect(search_entry, "search-changed", G_CALLBACK(on_search), overlay2);
+    g_signal_connect(search_entry, "search-changed", G_CALLBACK(on_search), search_result_list);
 
-    gtk_box_set_homogeneous(GTK_BOX(mop_container), TRUE);
+    /*gtk_box_set_homogeneous(GTK_BOX(mop_container), TRUE);
     gtk_widget_set_halign(GTK_WIDGET(mop_container), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(mop_container), GTK_ALIGN_START);
     gtk_widget_set_margin_top(GTK_WIDGET(mop_container), 260);
     gtk_widget_set_hexpand(GTK_WIDGET(mop_container), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(mop_container), TRUE);
-    
+   */ 
 
 
     gtk_box_append(GTK_BOX(container), overlay);

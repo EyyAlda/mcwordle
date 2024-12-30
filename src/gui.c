@@ -7,7 +7,8 @@
 
 GtkWidget *app_stack;
 GtkWidget *search_results;
-GtkStringList *search_result_list;
+GtkWidget *search_result_list;
+GtkWidget *scroll_pane;
 
 int is_initialized = 0;
 
@@ -116,7 +117,8 @@ static void on_search(GtkEditable *editable, gpointer user_data){
     destroy_search_results(search_result_list);
 
     if (strlen(text) > 0){
-        create_mob_search_result_list(search_result_list, text);
+        search_result_list = create_mob_search_result_list(text);
+        gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll_pane), search_result_list);
         g_print("DEBUG: loaded search results\n");
     }
     
@@ -138,7 +140,7 @@ GtkWidget *create_game_panel(){
     fprintf(stdout, "DEBUG: Background: %s", background_path);
     
     GtkWidget *overlay = gtk_overlay_new();
-    GtkWidget *scroll_pane = gtk_scrolled_window_new();
+    scroll_pane = gtk_scrolled_window_new();
     GtkWidget *background = gtk_picture_new_for_filename(background_path);
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *item_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
@@ -155,7 +157,6 @@ GtkWidget *create_game_panel(){
     //GtkWidget *search_bar = gtk_search_bar_new();
     GtkWidget *search_bar_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *search_entry = gtk_search_entry_new();
-    search_result_list = gtk_string_list_new(NULL);
 
     gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), item_container);
@@ -235,6 +236,7 @@ GtkWidget *create_game_panel(){
 
 void on_destroy(GtkWidget *window, gpointer user_data){
     unref_mob_data();
+    destroy_search_results(search_result_list);
     g_print("DEBUG: ran on_destroy\n");
 }
 

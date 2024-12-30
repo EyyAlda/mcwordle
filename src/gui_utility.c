@@ -5,30 +5,87 @@
 #include "../include/gui_utility.h"
 #include "../include/get_files_path.h"
 
-GtkWidget *mcwordle_create_game_mob_row_view(char **mob_data){
-    if (mob_data == NULL) return NULL;
+typedef struct {
+    const char *name;
+    const char *version;
+    const char *height;
+    const char *health;
+    const char *spawn;
+    const char *class;
+    const char *behavior;
+    const char *icon_path;
+} MobDataItem;
+
+static GtkListItemFactory* create_factory();
+GListStore *list_store = NULL;
+
+G_DECLARE_FINAL_TYPE(ListItem, list_item, LIST, ITEM, GObject)
+
+struct _ListItem {
+    GObject parent_instance;
+    MobDataItem data;
+};
+
+G_DEFINE_TYPE(ListItem, list_item, G_TYPE_OBJECT)
+
+static void list_item_init(ListItem *self) {
+}
+
+static void list_item_class_init(ListItemClass *self) {
+}
+
+ListItem* mob_data_item_new(const char *name, const char *version, const char *height, const char *health, const char *spawn, const char *class, const char *behavior, const char *icon_path) {
+    ListItem *item = g_object_new(list_item_get_type(), NULL);
+    item->data.name = name;
+    item->data.version = version;
+    item->data.height = height;
+    item->data.health = health;
+    item->data.spawn = spawn;
+    item->data.class = class;
+    item->data.behavior = behavior;
+    item->data.icon_path = icon_path;
+
+    return item;
+}
+
+
+/** Erstellt eine Reihe mit den 5 Mob-Daten für die Anzeige im Spiel
+ * @param char **mob_data
+ */
+static void setup_mob_element(GtkListItemFactory *factory, GtkListItem *item){
 
     /** Container Element
      * Beinhaltet mehrere weitere Elemente
      */
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10); 
     
-    GtkWidget *mob_name = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *mob_icon = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *health = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *height = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *version = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *spawn = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *class = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *behavior = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *mob_name = gtk_button_new();
+    GtkWidget *mob_icon = gtk_button_new();
+    GtkWidget *health = gtk_button_new();
+    GtkWidget *height = gtk_button_new();
+    GtkWidget *version = gtk_button_new();
+    GtkWidget *spawn = gtk_button_new();
+    GtkWidget *class = gtk_button_new();
+    GtkWidget *behavior = gtk_button_new();
 
-    GtkWidget *mob_name_label = gtk_label_new(mob_data[0]);
-    GtkWidget *mob_health_label = gtk_label_new(mob_data[2]);
-    GtkWidget *mob_height_label = gtk_label_new(mob_data[3]);
-    GtkWidget *mob_version_label = gtk_label_new(mob_data[1]);
-    GtkWidget *mob_spawn_label = gtk_label_new(mob_data[5]);
-    GtkWidget *mob_class_label = gtk_label_new(mob_data[6]);
-    GtkWidget *mob_behavior_label = gtk_label_new(mob_data[4]);
+    GtkWidget *mob_name_label = gtk_label_new(NULL);
+    GtkWidget *mob_health_label = gtk_label_new(NULL);
+    GtkWidget *mob_height_label = gtk_label_new(NULL);
+    GtkWidget *mob_version_label = gtk_label_new(NULL);
+    GtkWidget *mob_spawn_text = gtk_text_view_new();
+    GtkWidget *mob_class_text = gtk_text_view_new();
+    GtkWidget *mob_behavior_text = gtk_text_view_new();
+
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(mob_spawn_text), FALSE);
+    gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(mob_spawn_text), FALSE);
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(mob_spawn_text), GTK_WRAP_WORD);
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(mob_class_text), FALSE);
+    gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(mob_class_text), FALSE);
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(mob_class_text), GTK_WRAP_WORD);
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(mob_behavior_text), FALSE);
+    gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(mob_behavior_text), FALSE);
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(mob_behavior_text), GTK_WRAP_WORD);
+
 
     gtk_widget_set_size_request(mob_icon, 110, 110);
     gtk_widget_set_size_request(mob_name, 110, 110);
@@ -48,18 +105,7 @@ GtkWidget *mcwordle_create_game_mob_row_view(char **mob_data){
     gtk_widget_set_hexpand(class, FALSE);
     gtk_widget_set_hexpand(behavior, FALSE);
 
-    char *base_path = return_folders_path();
-    char picture_path[strlen(base_path) + strlen(mob_data[7]) + 1];
-    fprintf(stdout, "DEBUG: loading image\n");
-    strcpy(picture_path, base_path);
-    strcat(picture_path, mob_data[7]);
-    // lade das Bild für das Mob
-    fprintf(stdout, "DEBUG: Image Path: %s\n", picture_path);
-    GtkWidget *icon_texture = gtk_image_new_from_file(picture_path);
-    gtk_box_append(GTK_BOX(mob_icon), icon_texture);
-    fprintf(stdout, "DEBUG: freeing base_path\n");
-    free(base_path);
-    
+    gtk_box_set_homogeneous(GTK_BOX(container), TRUE);    
     
     // füge alles zum Container hinzu
     gtk_box_append(GTK_BOX(container), mob_name);
@@ -71,13 +117,13 @@ GtkWidget *mcwordle_create_game_mob_row_view(char **mob_data){
     gtk_box_append(GTK_BOX(container), spawn);
     gtk_box_append(GTK_BOX(container), class);
 
-    gtk_box_append(GTK_BOX(mob_name), mob_name_label);
-    gtk_box_append(GTK_BOX(version), mob_version_label);
-    gtk_box_append(GTK_BOX(health), mob_health_label);
-    gtk_box_append(GTK_BOX(height), mob_height_label);
-    gtk_box_append(GTK_BOX(behavior), mob_behavior_label);
-    gtk_box_append(GTK_BOX(spawn), mob_spawn_label);
-    gtk_box_append(GTK_BOX(class), mob_class_label);
+    gtk_button_set_child(GTK_BUTTON(mob_name), mob_name_label);
+    gtk_button_set_child(GTK_BUTTON(version), mob_version_label);
+    gtk_button_set_child(GTK_BUTTON(health), mob_health_label);
+    gtk_button_set_child(GTK_BUTTON(height), mob_height_label);
+    gtk_button_set_child(GTK_BUTTON(behavior), mob_behavior_text);
+    gtk_button_set_child(GTK_BUTTON(spawn), mob_spawn_text);
+    gtk_button_set_child(GTK_BUTTON(class), mob_class_text);
 
     // gib allen Elementen die gleiche Größe
     //gtk_widget_set_size_request(GTK_WIDGET(container), 110, 110);
@@ -120,14 +166,63 @@ GtkWidget *mcwordle_create_game_mob_row_view(char **mob_data){
     gtk_button_set_label(GTK_BUTTON(mob_name), mob_data[0]);
     */
     //gtk_button_set_child(GTK_BUTTON(container_container), container);
-    return container;
+    gtk_list_item_set_child(item, container);
 }
 
-void setup_result(GtkListItemFactory *factory, GtkListItem *list_item){
+static void bind_mob_element(GtkListItemFactory *factory, GtkListItem *item){
 
 
+    GtkWidget *container = gtk_list_item_get_child(item);
+    GtkWidget *mob_name = gtk_widget_get_first_child(container);
+    GtkWidget *mob_icon = gtk_widget_get_next_sibling(mob_name);
+    GtkWidget *version = gtk_widget_get_next_sibling(mob_icon);
+    GtkWidget *health = gtk_widget_get_next_sibling(version);
+    GtkWidget *height = gtk_widget_get_next_sibling(health);
+    GtkWidget *behavior = gtk_widget_get_next_sibling(height);
+    GtkWidget *spawn = gtk_widget_get_next_sibling(behavior);
+    GtkWidget *class = gtk_widget_get_next_sibling(spawn);
+    
+    ListItem *list_item = gtk_list_item_get_item(item);
+    MobDataItem *data = &list_item->data;
+
+    GtkWidget *mob_name_label = gtk_widget_get_first_child(mob_name);
+    gtk_label_set_text(GTK_LABEL(mob_name_label), data->name);
+
+    GtkWidget *version_label = gtk_widget_get_first_child(version);
+    gtk_label_set_text(GTK_LABEL(version_label), data->version);
+
+    GtkWidget *health_label = gtk_widget_get_first_child(health);
+    gtk_label_set_text(GTK_LABEL(health_label), data->health);
+
+    GtkWidget *height_label = gtk_widget_get_first_child(height);
+    gtk_label_set_text(GTK_LABEL(height_label), data->height);
+
+    GtkWidget *behavior_text = gtk_widget_get_first_child(behavior);
+    GtkTextBuffer *behavior_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(behavior_text));
+    gtk_text_buffer_set_text(behavior_text_buffer, data->behavior, -1);
+
+    GtkWidget *spawn_text = gtk_widget_get_first_child(spawn);
+    GtkTextBuffer *spawn_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(spawn_text));
+    gtk_text_buffer_set_text(spawn_text_buffer, data->behavior, -1);
+
+    GtkWidget *class_text = gtk_widget_get_first_child(class);
+    GtkTextBuffer *class_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(class_text));
+    gtk_text_buffer_set_text(class_text_buffer, data->behavior, -1);
+
+    char *base_path = return_folders_path();
+    char picture_path[strlen(base_path) + strlen(data->icon_path) + 1];
+    fprintf(stdout, "DEBUG: loading image\n");
+    strcpy(picture_path, base_path);
+    strcat(picture_path, data->icon_path);
+    // lade das Bild für das Mob
+    fprintf(stdout, "DEBUG: Image Path: %s\n", picture_path);
+    GtkWidget *icon_texture = gtk_image_new_from_file(picture_path);
+    gtk_button_set_child(GTK_BUTTON(mob_icon), icon_texture);
+    fprintf(stdout, "DEBUG: freeing base_path\n");
+    free(base_path);
 
 }
+
 
 /**Zählt die Menge an Elementen, die zu einer Box hinzugefügt wurden
  * Wird genutzt, um einen leeren bildschirm zu verhindern falls kein mob mit einem spezifischem Namen gefunden wurde
@@ -146,12 +241,14 @@ int count_found_mobs(GtkStringList *widget){
  * @param GtkWidget *container
  * @param const char *mob_name
  */
-int create_mob_search_result_list(GtkStringList *container, const char *mob_name){
+GtkWidget* create_mob_search_result_list(const char *mob_name){
     int mob_count = get_mob_counter();
 
 
     fprintf(stdout, "DEBUG: getting Data\n");
     char ***mob_data = get_mob_data();
+
+    list_store = g_list_store_new(list_item_get_type());
     
     fprintf(stdout, "DEBUG: checking pointer\n");
     if (mob_data != NULL){
@@ -160,28 +257,42 @@ int create_mob_search_result_list(GtkStringList *container, const char *mob_name
             // vergleiche eingegebenen Namen und vorhandene Daten
             if (g_strstr_len(mob_data[i][0], -1, mob_name)){
 
-                g_print("DEBUG: creating results\n");
-                gtk_string_list_append(container, mob_data[i][0]);
+                g_print("DEBUG: counting results\n");
                 //bei jedem treffer wird ein neues Element zur Liste hinzugefügt
-                gtk_box_append(GTK_BOX(container), mcwordle_create_game_mob_row_view(mob_data[i]));
+                g_list_store_append(list_store, mob_data_item_new(
+                            mob_data[i][0], // name
+                            mob_data[i][1], // version
+                            mob_data[i][3], // height
+                            mob_data[i][2], // health
+                            mob_data[i][5], // spawn
+                            mob_data[i][6], // class
+                            mob_data[i][4], // behavior
+                            mob_data[i][7]  // icon Path
+                            ));
             }
         }
+
     }
+
+    GtkWidget *list_view = gtk_list_view_new(GTK_SELECTION_MODEL(gtk_single_selection_new(G_LIST_MODEL(list_store))), create_factory());
 
     //falls die Suche keine treffer ergab, zeige es an
-    if (!count_found_mobs(container)){
-        GtkWidget *empty_label = gtk_label_new("No result found");
-    }
+    //if (!count_found_mobs(container)){
+        //GtkWidget *empty_label = gtk_label_new("No result found");
+    //}
 
-    return 0;
+    return list_view;
 }
 
+static GtkListItemFactory* create_factory(){
+    GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
+    g_signal_connect(factory, "setup", G_CALLBACK(setup_mob_element), NULL);
+    g_signal_connect(factory, "bind", G_CALLBACK(bind_mob_element), NULL);
+    return factory;
+}
 /**removes the listed search results
  */
-int destroy_search_results(GtkStringList *parent){
-
-    while (gtk_string_list_get_string(parent, 0) != NULL) {
-        gtk_string_list_remove(parent, 0);
-    }
-    return 0;
+void destroy_search_results(GtkWidget *list_view){
+    g_object_unref(list_store);
+    gtk_widget_unparent(list_view);
 }

@@ -22,7 +22,7 @@ void on_end_button_click(GtkWidget *widget, gpointer user_data){
 GtkWidget *create_main_menu(){
     fprintf(stdout, "0\n");
     char *path = return_folders_path();
-    
+
 
     char background_path[strlen(path) + strlen("/Background/download.webp") + 1];
     fprintf(stdout, "1\n");
@@ -40,7 +40,7 @@ GtkWidget *create_main_menu(){
     GtkWidget *middle_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     GtkWidget *start_button = gtk_button_new_with_label("Start Game");
     GtkWidget *header_label = gtk_label_new("MC Wordle");
-    
+
     gtk_picture_set_can_shrink(GTK_PICTURE(background), TRUE);
     gtk_widget_set_vexpand(background, TRUE);
     gtk_picture_set_content_fit(GTK_PICTURE(background), GTK_CONTENT_FIT_COVER);
@@ -88,7 +88,7 @@ GtkWidget *create_main_menu(){
     GtkWidget *behavior2_button = gtk_button_new_with_label("Behavior");
     GtkWidget *spawn2_button = gtk_button_new_with_label("Spawn");
     GtkWidget *class2_button = gtk_button_new_with_label("Class");
-    
+
     gtk_box_append(GTK_BOX(mop_container),picture_button);
     gtk_box_append(GTK_BOX(mop_container),version2_button);
     gtk_box_append(GTK_BOX(mop_container),hp2_button);
@@ -104,16 +104,16 @@ GtkWidget *create_main_menu(){
     gtk_widget_set_size_request(behavior2_button, 110, 110);
     gtk_widget_set_size_request(spawn2_button, 110, 110);
     gtk_widget_set_size_request(class2_button, 110, 110);
-    
+
     gtk_button_set_child(GTK_BUTTON(picture_button), button_icon);
-    
+
     return mop_container;
 }
 */
 
 static void on_search(GtkEditable *editable, gpointer user_data){
-    const char *text = gtk_editable_get_text(editable);  
-     
+    const char *text = gtk_editable_get_text(editable);
+
     destroy_search_results(search_result_list);
 
     if (strlen(text) > 0){
@@ -121,14 +121,14 @@ static void on_search(GtkEditable *editable, gpointer user_data){
         gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll_pane), search_result_list);
         g_print("DEBUG: loaded search results\n");
     }
-    
+
     g_print("text changed: %s\n", text);
 }
 
 GtkWidget *create_game_panel(){
     fprintf(stdout, "0\n");
     char *path = return_folders_path();
-    
+
 
     char background_path[strlen(path) + strlen("/Background/background2.webp") + 1];
     fprintf(stdout, "1\n");
@@ -138,13 +138,13 @@ GtkWidget *create_game_panel(){
 
     free(path);
     fprintf(stdout, "DEBUG: Background: %s", background_path);
-    
+
     GtkWidget *overlay = gtk_overlay_new();
     scroll_pane = gtk_scrolled_window_new();
     GtkWidget *background = gtk_picture_new_for_filename(background_path);
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *item_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    //GtkWidget *mop_container = create_mob_container(); 
+    //GtkWidget *mop_container = create_mob_container();
     GtkWidget *end_button = gtk_button_new_with_label("End Game");
     GtkWidget *mop_button = gtk_button_new_with_label("Mop");
     GtkWidget *version_button = gtk_button_new_with_label("Version");
@@ -181,13 +181,13 @@ GtkWidget *create_game_panel(){
     gtk_widget_set_margin_top(search_results, 200);
 
     gtk_box_append(GTK_BOX(search_bar_container), search_entry);
-    
+
     gtk_box_append(GTK_BOX(button_container),end_button);
 
     gtk_picture_set_can_shrink(GTK_PICTURE(background), TRUE);
     gtk_widget_set_vexpand(background, TRUE);
     gtk_picture_set_content_fit(GTK_PICTURE(background), GTK_CONTENT_FIT_COVER);
-    
+
     gtk_widget_set_halign(GTK_WIDGET(button_container), GTK_ALIGN_END);
     gtk_widget_set_valign(GTK_WIDGET(button_container), GTK_ALIGN_END);
     gtk_widget_set_hexpand(GTK_WIDGET(button_container), TRUE);
@@ -201,7 +201,7 @@ GtkWidget *create_game_panel(){
     gtk_widget_set_size_request(spawn_button, 110, 20);
     gtk_widget_set_size_request(class_button, 110, 20);
 
-   
+
     gtk_box_set_homogeneous(GTK_BOX(item_container), TRUE);
     gtk_widget_set_halign(GTK_WIDGET(item_container), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(item_container), GTK_ALIGN_START);
@@ -223,7 +223,7 @@ GtkWidget *create_game_panel(){
     gtk_widget_set_margin_top(GTK_WIDGET(mop_container), 260);
     gtk_widget_set_hexpand(GTK_WIDGET(mop_container), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(mop_container), TRUE);
-   */ 
+   */
 
 
     gtk_box_append(GTK_BOX(container), overlay);
@@ -245,7 +245,7 @@ void on_activate(GtkApplication *app, gpointer user_data){
     app_stack = gtk_stack_new();
     GtkWidget *main_menu = create_main_menu();
     GtkWidget *game_panel = create_game_panel();
-    
+
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
     gtk_stack_set_transition_type(GTK_STACK(app_stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     gtk_stack_set_transition_duration(GTK_STACK(app_stack), 100);
@@ -255,24 +255,21 @@ void on_activate(GtkApplication *app, gpointer user_data){
     gtk_stack_add_named(GTK_STACK(app_stack), main_menu, "main-menu");
     gtk_stack_add_named(GTK_STACK(app_stack), game_panel, "game-panel");
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
-    
+
     char *base_path = return_folders_path();
 
     char css_path[strlen(base_path) + strlen("/styles.css") + 1];
 
     strcpy(css_path, base_path);
     strcat(css_path, "/styles.css");
-    
+
     free(base_path);
 
     GtkCssProvider *provider = gtk_css_provider_new();
 
     gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider), css_path);
-    
-    g_object_unref(provider);
-    
 
-    array();
+    g_object_unref(provider);
 
     gtk_window_set_child(GTK_WINDOW(window), app_stack);
     gtk_window_present(GTK_WINDOW(window));

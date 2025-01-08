@@ -7,8 +7,6 @@
 
 GtkWidget *app_stack;
 GtkWidget *search_results;
-GtkWidget *search_result_list;
-GtkWidget *scroll_pane;
 
 int is_initialized = 0;
 
@@ -111,18 +109,15 @@ GtkWidget *create_main_menu(){
 }
 */
 
-static void on_search(GtkEditable *editable, gpointer user_data){
-    const char *text = gtk_editable_get_text(editable);
-
-    destroy_search_results(search_result_list);
-
-    if (strlen(text) > 0){
-        search_result_list = create_mob_search_result_list(text);
-        gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll_pane), search_result_list);
-        g_print("DEBUG: loaded search results\n");
-    }
-
-    g_print("text changed: %s\n", text);
+static void on_search(GtkEditable *editable, gpointer user_data) {
+  const char *text = gtk_editable_get_text(editable);
+  if (strlen(text) > 0) {
+      update_mob_list(text);
+      g_print("DEBUG: loaded search results\n");
+  } else {
+      update_mob_list("adsfladskjfghldsfkjghls");
+  }
+  g_print("text changed: %s\n", text);
 }
 
 GtkWidget *create_game_panel(){
@@ -140,7 +135,6 @@ GtkWidget *create_game_panel(){
     fprintf(stdout, "DEBUG: Background: %s", background_path);
 
     GtkWidget *overlay = gtk_overlay_new();
-    scroll_pane = gtk_scrolled_window_new();
     GtkWidget *background = gtk_picture_new_for_filename(background_path);
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *item_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
@@ -160,13 +154,10 @@ GtkWidget *create_game_panel(){
 
     gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), item_container);
-    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), scroll_pane);
+    add_list_to_overlay(GTK_OVERLAY(overlay));
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), search_bar_container);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), button_container);
 
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll_pane), GTK_WIDGET(search_result_list));
-
-    gtk_widget_add_css_class(scroll_pane, "scroll-pane");
 
     gtk_box_append(GTK_BOX(item_container),mop_button);
     gtk_box_append(GTK_BOX(item_container),version_button);
@@ -215,7 +206,7 @@ GtkWidget *create_game_panel(){
     gtk_widget_set_margin_top(GTK_WIDGET(search_bar_container), 20);
     gtk_search_entry_set_placeholder_text(GTK_SEARCH_ENTRY(search_entry), "Search for a Mob");
     gtk_search_entry_set_search_delay(GTK_SEARCH_ENTRY(search_entry), search_delay);
-    g_signal_connect(search_entry, "search-changed", G_CALLBACK(on_search), search_result_list);
+    g_signal_connect(search_entry, "search-changed", G_CALLBACK(on_search), NULL);
 
     /*gtk_box_set_homogeneous(GTK_BOX(mop_container), TRUE);
     gtk_widget_set_halign(GTK_WIDGET(mop_container), GTK_ALIGN_CENTER);
@@ -235,8 +226,8 @@ GtkWidget *create_game_panel(){
 }
 
 void on_destroy(GtkWidget *window, gpointer user_data){
-    unref_mob_data();
-    destroy_search_results(search_result_list);
+    //unref_mob_data();
+    cleanup_mob_list_view();
     g_print("DEBUG: ran on_destroy\n");
 }
 

@@ -22,45 +22,59 @@ int does_file_exist(const char * filepath){
 }
 
 
-char* return_folders_path(){
+char* return_folders_path() {
     char command[] = "echo $HOME";
     char buffer[128];
     char directory[] = "/MCWordle";
 
-    FILE * pipe = popen(command, "r");
-    if (pipe == NULL){
+    // Open a pipe to execute the command
+    FILE *pipe = popen(command, "r");
+    if (pipe == NULL) {
         perror("Running Command Failed");
         return NULL;
     }
-    fgets(buffer, sizeof(buffer), pipe);
 
-    for (int i = 0; i < sizeof(buffer)/sizeof(char); i++){
-        if (buffer[i] == '\n'){
+    // Read the output of the command into buffer
+    if (fgets(buffer, sizeof(buffer), pipe) == NULL) {
+        perror("Failed to read command output");
+        pclose(pipe);
+        return NULL;
+    }
+    pclose(pipe);
+
+    // Remove newline character from buffer
+    for (int i = 0; i < sizeof(buffer) / sizeof(char); i++) {
+        if (buffer[i] == '\n') {
             buffer[i] = '\0';
+            break; // No need to continue checking after null terminator
         }
     }
 
-    output = malloc(sizeof(char *));
+    // Allocate memory for the full path
+    size_t path_length = strlen(buffer) + strlen(directory) + 1; // +1 for null terminator
+    output = malloc(path_length);
+    if (output == NULL) {
+        perror("Memory allocation failed");
+        return NULL;
+    }
+
+    // Construct the full path
     strcpy(output, buffer);
     strcat(output, directory);
     fprintf(stdout, "return_folders_path: %s\n", output);
 
-    if (!does_file_exist(output)){
-        errno = 2;
+    // Check if the path exists
+    if (!does_file_exist(output)) {
+        errno = ENOENT; // Set error code for "No such file or directory"
         fprintf(stderr, "Path: %s: ", output);
         perror("");
         fprintf(stderr, "\n");
-        free(output);
+        free(output); // Free allocated memory if the path does not exist
         output = NULL;
     }
 
     return output;
 }
-
-void free_folders_ptr(){
-    free(output);
-}
-
 
 #endif
 

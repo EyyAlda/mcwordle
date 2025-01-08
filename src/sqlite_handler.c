@@ -127,9 +127,9 @@ struct MobQueryData* get_search_results(const char *text) {
     int rc;
 
     char *base_path = return_folders_path();
-    char database_path[strlen(base_path) + strlen("/Minecraft Projekt Minecraft.db") + 1];
+    char database_path[strlen(base_path) + strlen("/Minecraft_Projekt_Minecraft.db") + 1];
     strcpy(database_path, base_path);
-    strcat(database_path, "/Minecraft Projekt Minecraft.db");
+    strcat(database_path, "/Minecraft_Projekt_Minecraft.db");
     printf("Database path: %s\n", database_path);
 
     rc = sqlite3_open(database_path, &db);

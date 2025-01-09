@@ -325,6 +325,13 @@ static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
     GtkWidget *class_button = gtk_button_new();
     GtkWidget *behavior_button = gtk_button_new();
 
+    char *base_path = return_folders_path();
+    char full_path[strlen(base_path) + strlen(mob_data->picture_path) + 1];
+    strcpy(full_path, base_path);
+    strcat(full_path, mob_data->picture_path);
+    GtkWidget *icon = gtk_image_new_from_file(full_path);
+    printf("DEBUG: Icon_path: %s\n", full_path);
+    free(base_path);
     // Create labels for mob information
     GtkWidget *name_label = gtk_label_new(mob_data->name);
     printf("%s\n", mob_data->name);
@@ -352,6 +359,7 @@ static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
     gtk_button_set_child(GTK_BUTTON(height_button), height_label);
     gtk_button_set_child(GTK_BUTTON(behavior_button), behavior_label);
     gtk_button_set_child(GTK_BUTTON(class_button), class_label);
+    gtk_button_set_child(GTK_BUTTON(icon_button), icon);
     /*GtkWidget *details_label = gtk_label_new(NULL);
     gtk_widget_set_halign(details_label, GTK_ALIGN_CENTER);
     char *details = g_strdup_printf("Version: \tHealth: \tHeight: \tClass: \n %s \t %s \t %s \t %s", mob_data->version, mob_data->health, mob_data->height, mob_data->class);

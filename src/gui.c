@@ -1,6 +1,7 @@
 #include <gtk-4.0/gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../include/sqlite_handler.h"
 #include "../include/gui.h"
 #include "../include/gui_utility.h"
 #include "../include/get_files_path.h"
@@ -8,27 +9,18 @@
 GtkWidget *app_stack;
 GtkWidget *search_results;
 GtkWidget *item_container;
+struct MobQueryData *random_Mob;
+
 int is_initialized = 0;
 
-void get_randomize_mop(){
-
-    // Initialisiere den Zufallszahlengenerator mit der aktuellen Zeit
-    srand(time(NULL));
-
-    // Generiere eine Zufallszahl in einem bestimmten Bereich, z.B. zwischen 1 und 100
-    int randomInRange = (rand() % 82) + 1;
-    printf("Zufallszahl zwischen 1 und 100: %d\n", randomInRange);
-
-    return 0;
-}
-
 void on_start_button_click(GtkWidget *widget, gpointer user_data){
-    get_randomize_mop();
+    random_Mob = select_random_Mob();
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "game-panel");
 }
 
 void on_end_button_click(GtkWidget *widget, gpointer user_data){
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
+    free(random_Mob);
 }
 GtkWidget *create_main_menu(){
     fprintf(stdout, "0\n");
@@ -242,6 +234,7 @@ GtkWidget *create_game_panel(){
 void on_destroy(GtkWidget *window, gpointer user_data){
     //unref_mob_data();
     cleanup_mob_list_view();
+    free(random_Mob);
     g_print("DEBUG: ran on_destroy\n");
 }
 

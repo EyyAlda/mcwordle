@@ -13,10 +13,14 @@ struct MobQueryData *random_Mob;
 
 int is_initialized = 0;
 
-void on_start_button_click(GtkWidget *widget, gpointer user_data){
+void on_start_Mop_button_click(GtkWidget *widget, gpointer user_data){
     random_Mob = select_random_Mob();
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "game-panel");
 }
+void on_start_Block_button_click(GtkWidget *widget, gpointer user_data){
+
+}
+
 
 void on_end_button_click(GtkWidget *widget, gpointer user_data){
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
@@ -41,7 +45,8 @@ GtkWidget *create_main_menu(){
     GtkWidget *background = gtk_picture_new_for_filename(background_path);
     GtkWidget *start_button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *middle_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
-    GtkWidget *start_button = gtk_button_new_with_label("Start Game");
+    GtkWidget *start_button_Mop = gtk_button_new_with_label("Mop Wordel");
+    GtkWidget *start_button_Block = gtk_button_new_with_label("Block Wordle");
     GtkWidget *header_label = gtk_label_new("MC Wordle");
 
     gtk_picture_set_can_shrink(GTK_PICTURE(background), TRUE);
@@ -66,16 +71,19 @@ GtkWidget *create_main_menu(){
     gtk_widget_set_hexpand(GTK_WIDGET(middle_container), TRUE);
     gtk_widget_set_vexpand(GTK_WIDGET(middle_container), TRUE);
 
-    gtk_box_append(GTK_BOX(start_button_container), start_button);
+    gtk_box_append(GTK_BOX(start_button_container), start_button_Mop);
+    gtk_box_append(GTK_BOX(start_button_container), start_button_Block);
     gtk_box_append(GTK_BOX(middle_container), header_label);
     gtk_box_append(GTK_BOX(middle_container), start_button_container);
 
     gtk_box_append(GTK_BOX(container), overlay);
 
-    gtk_widget_add_css_class(GTK_WIDGET(start_button), "start-button");
+    gtk_widget_add_css_class(GTK_WIDGET(start_button_Mop), "start-button");
+    gtk_widget_add_css_class(GTK_WIDGET(start_button_Block), "start-button");
     gtk_widget_add_css_class(GTK_WIDGET(header_label), "header-main-menu");
 
-    g_signal_connect(start_button, "clicked", G_CALLBACK(on_start_button_click), NULL);
+    g_signal_connect(start_button_Mop, "clicked", G_CALLBACK(on_start_Mop_button_click), NULL);
+    g_signal_connect(start_button_Block, "clicked", G_CALLBACK(on_start_Block_button_click), NULL);
     g_print("DEBUG: created main menu\n");
     return container;
 }

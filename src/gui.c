@@ -7,7 +7,7 @@
 
 GtkWidget *app_stack;
 GtkWidget *search_results;
-
+GtkWidget *item_container;
 int is_initialized = 0;
 
 void on_start_button_click(GtkWidget *widget, gpointer user_data){
@@ -114,8 +114,10 @@ static void on_search(GtkEditable *editable, gpointer user_data) {
   if (strlen(text) > 0) {
       update_mob_list(text);
       g_print("DEBUG: loaded search results\n");
+      gtk_widget_set_visible(item_container, FALSE);
   } else {
-      update_mob_list("adsfladskjfghldsfkjghls");
+      update_mob_list("adsfladskjfghaldsfkjghls");
+        gtk_widget_set_visible(item_container , TRUE);
   }
   g_print("text changed: %s\n", text);
 }
@@ -137,7 +139,7 @@ GtkWidget *create_game_panel(){
     GtkWidget *overlay = gtk_overlay_new();
     GtkWidget *background = gtk_picture_new_for_filename(background_path);
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *item_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    item_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     //GtkWidget *mop_container = create_mob_container();
     GtkWidget *end_button = gtk_button_new_with_label("End Game");
     GtkWidget *mop_button = gtk_button_new_with_label("Mop");

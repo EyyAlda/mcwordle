@@ -10,7 +10,20 @@ GtkWidget *search_results;
 GtkWidget *item_container;
 int is_initialized = 0;
 
+void get_randomize_mop(){
+
+    // Initialisiere den Zufallszahlengenerator mit der aktuellen Zeit
+    srand(time(NULL));
+
+    // Generiere eine Zufallszahl in einem bestimmten Bereich, z.B. zwischen 1 und 100
+    int randomInRange = (rand() % 82) + 1;
+    printf("Zufallszahl zwischen 1 und 100: %d\n", randomInRange);
+
+    return 0;
+}
+
 void on_start_button_click(GtkWidget *widget, gpointer user_data){
+    get_randomize_mop();
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "game-panel");
 }
 
@@ -125,7 +138,6 @@ static void on_search(GtkEditable *editable, gpointer user_data) {
 GtkWidget *create_game_panel(){
     fprintf(stdout, "0\n");
     char *path = return_folders_path();
-
 
     char background_path[strlen(path) + strlen("/Background/background2.webp") + 1];
     fprintf(stdout, "1\n");

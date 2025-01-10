@@ -9,8 +9,56 @@
 
 struct MobQueryData *init_pointer;
 struct MobQueryData *current_struct;
+struct MobQueryData *random_mob;
 const char *search;
 int is_init_pointer_set = 0;
+
+// Helper function to safely copy strings
+static char* strdup_safe(const char* str) {
+    if (!str) return NULL;
+    return strdup(str);
+}
+
+// Callback-Funktion für das Ergebnis der SQL-Abfrage
+int zufallCallback(void *data, int argc, char **argv, char **azColName) {
+    printf("DEBUG Zufällig ausgewähltes Tier: %s\n", argv[0]);
+    random_mob = (struct MobQueryData *)malloc(sizeof(struct MobQueryData));
+    random_mob->name = strdup_safe(argv[0]);
+    random_mob->version = strdup_safe(argv[1]);
+    random_mob->health = strdup_safe(argv[2]);
+    random_mob->height = strdup_safe(argv[3]);
+    random_mob->behavior = strdup_safe(argv[4]);
+    random_mob->spawn = strdup_safe(argv[5]);
+    random_mob->class = strdup_safe(argv[6]);
+    random_mob->picture_path = strdup_safe(argv[7]);
+    return 0;
+}
+
+struct MobQueryData* select_random_Mob() {
+    sqlite3 *db;
+    char *errMsg = 0;
+
+    // Öffne die SQLite-Datenbank (erstellt sie, wenn sie nicht existiert)
+    if (sqlite3_open("/home/nickgegenheimer/MCWordle/Minecraft_Projekt_Minecraft.db", &db)) {
+        fprintf(stderr, "Kann Datenbank nicht öffnen: %s\n", sqlite3_errmsg(db));
+        return 1;
+    }
+
+    // SQL-Abfrage, um ein zufälliges Tier auszuwählen
+    const char *sql = "SELECT Name FROM Mops ORDER BY RANDOM() LIMIT 1;";
+
+    // Führe die SQL-Abfrage aus
+    if (sqlite3_exec(db, sql, zufallCallback, 0, &errMsg) != SQLITE_OK) {
+        fprintf(stderr, "SQL-Fehler: %s\n", errMsg);
+        sqlite3_free(errMsg);
+    }
+
+
+
+    // Schließe die Datenbank
+    sqlite3_close(db);
+    return random_mob;
+}
 
 // Flexible, case-insensitive matching function
 int flexible_match_case_insensitive(const char *haystack, const char *needle) {
@@ -37,12 +85,6 @@ int flexible_match_case_insensitive(const char *haystack, const char *needle) {
     }
 
     return 1; // All characters in needle matched
-}
-
-// Helper function to safely copy strings
-static char* strdup_safe(const char* str) {
-    if (!str) return NULL;
-    return strdup(str);
 }
 
 int clear_search_result_data(struct MobQueryData* mob_query_data) {

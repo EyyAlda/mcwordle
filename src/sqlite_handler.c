@@ -51,7 +51,7 @@ struct MobQueryData* select_random_Mob() {
     }
 
     // SQL-Abfrage, um ein zufälliges Tier auszuwählen
-    const char *sql = "SELECT Name FROM Mops ORDER BY RANDOM() LIMIT 1;";
+    const char *sql = "SELECT Name, Version, HP, Height, Behavior, Spawn, Class, Picture FROM Mops ORDER BY RANDOM() LIMIT 1;";
 
     random_mob = NULL;
     random_mob = (struct MobQueryData *)malloc(sizeof(struct MobQueryData));

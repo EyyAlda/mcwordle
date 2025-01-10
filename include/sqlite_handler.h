@@ -16,5 +16,5 @@ struct MobQueryData {
 
 struct MobQueryData* get_search_results(const char *text);
 int clear_search_result_data(struct MobQueryData* mob_query_data);
-int select_random_Mob();
+struct MobQueryData* select_random_Mob();
 #endif

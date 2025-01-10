@@ -22,7 +22,13 @@ static char* strdup_safe(const char* str) {
 // Callback-Funktion für das Ergebnis der SQL-Abfrage
 int zufallCallback(void *data, int argc, char **argv, char **azColName) {
     printf("DEBUG Zufällig ausgewähltes Tier: %s\n", argv[0]);
+    random_mob = NULL;
     random_mob = (struct MobQueryData *)malloc(sizeof(struct MobQueryData));
+    if (random_mob == NULL){
+        printf("memory allocation failed!\n");
+        return 1;
+    }
+    printf("werte einfüllen");
     random_mob->name = strdup_safe(argv[0]);
     random_mob->version = strdup_safe(argv[1]);
     random_mob->health = strdup_safe(argv[2]);
@@ -31,6 +37,7 @@ int zufallCallback(void *data, int argc, char **argv, char **azColName) {
     random_mob->spawn = strdup_safe(argv[5]);
     random_mob->class = strdup_safe(argv[6]);
     random_mob->picture_path = strdup_safe(argv[7]);
+    printf("DEBUG: struct beschrieben\n");
     return 0;
 }
 
@@ -41,7 +48,7 @@ struct MobQueryData* select_random_Mob() {
     // Öffne die SQLite-Datenbank (erstellt sie, wenn sie nicht existiert)
     if (sqlite3_open("/home/nickgegenheimer/MCWordle/Minecraft_Projekt_Minecraft.db", &db)) {
         fprintf(stderr, "Kann Datenbank nicht öffnen: %s\n", sqlite3_errmsg(db));
-        return 1;
+        return NULL;
     }
 
     // SQL-Abfrage, um ein zufälliges Tier auszuwählen
@@ -57,6 +64,7 @@ struct MobQueryData* select_random_Mob() {
 
     // Schließe die Datenbank
     sqlite3_close(db);
+    printf("returning value\n");
     return random_mob;
 }
 

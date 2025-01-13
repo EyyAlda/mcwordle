@@ -9,6 +9,7 @@
 GtkWidget *app_stack;
 GtkWidget *search_results;
 GtkWidget *item_container;
+GtkWidget *search_entry;
 struct MobQueryData *random_Mob;
 
 int is_initialized = 0;
@@ -26,6 +27,7 @@ void on_end_button_click(GtkWidget *widget, gpointer user_data){
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
     free(random_Mob);
 }
+
 GtkWidget *create_main_menu(){
     fprintf(stdout, "0\n");
     char *path = return_folders_path();
@@ -86,6 +88,12 @@ GtkWidget *create_main_menu(){
     g_signal_connect(start_button_Block, "clicked", G_CALLBACK(on_start_Block_button_click), NULL);
     g_print("DEBUG: created main menu\n");
     return container;
+}
+
+void search_row_click_handler(struct MobQueryData *mob_data, void *user_data){
+    if (!mob_data) return;
+    printf("row_clicked %s\n", mob_data->name);
+    gtk_editable_set_text(GTK_EDITABLE(search_entry), "");
 }
 
 /*GtkWidget *create_mob_container(){
@@ -164,7 +172,7 @@ GtkWidget *create_game_panel(){
     GtkWidget *button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     //GtkWidget *search_bar = gtk_search_bar_new();
     GtkWidget *search_bar_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *search_entry = gtk_search_entry_new();
+    search_entry = gtk_search_entry_new();
 
     gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), item_container);
@@ -172,6 +180,7 @@ GtkWidget *create_game_panel(){
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), search_bar_container);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), button_container);
 
+    set_row_click_handler(search_row_click_handler, NULL);
 
     gtk_box_append(GTK_BOX(item_container),mop_button);
     gtk_box_append(GTK_BOX(item_container),version_button);
@@ -247,6 +256,14 @@ void on_destroy(GtkWidget *window, gpointer user_data){
 }
 
 void on_activate(GtkApplication *app, gpointer user_data){
+
+    // Check if we already have a window
+    GList *windows = gtk_application_get_windows(app);
+    if (windows) {
+        // If window exists, present it and focus it
+        gtk_window_present(GTK_WINDOW(windows->data));
+        return;
+    }
     GtkWidget *window = gtk_application_window_new(app);
     app_stack = gtk_stack_new();
     GtkWidget *main_menu = create_main_menu();

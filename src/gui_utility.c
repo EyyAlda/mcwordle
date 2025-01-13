@@ -13,8 +13,40 @@ typedef struct {
 } MobListView;
 
 static MobListView *global_mob_list_view = NULL;
+static MobRowClickCallback row_click_callback = NULL;
+static void *row_click_user_data = NULL;
+
+// Function to set the click handler
+void set_row_click_handler(MobRowClickCallback callback, void *user_data) {
+    row_click_callback = callback;
+    row_click_user_data = user_data;
+}
+
+// Helper function to create a copy of mob data
+static struct MobQueryData* copy_mob_data(const struct MobQueryData *src) {
+    struct MobQueryData *copy = malloc(sizeof(struct MobQueryData));
+    if (!copy) return NULL;
+
+    copy->name = src->name ? strdup(src->name) : NULL;
+    copy->version = src->version ? strdup(src->version) : NULL;
+    copy->height = src->height ? strdup(src->height) : NULL;
+    copy->health = src->health ? strdup(src->health) : NULL;
+    copy->class = src->class ? strdup(src->class) : NULL;
+    copy->behavior = src->behavior ? strdup(src->behavior) : NULL;
+    copy->spawn = src->spawn ? strdup(src->spawn) : NULL;
+    copy->picture_path = src->picture_path ? strdup(src->picture_path) : NULL;
+    copy->next = NULL;
+
+    return copy;
+}
 
 static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
+    // Store a copy of the mob data in the row
+    struct MobQueryData *row_data = copy_mob_data(mob_data);
+    g_object_set_data_full(G_OBJECT(row), "mob-data", row_data,
+                          (GDestroyNotify)clear_search_result_data);
+
+
     // Create a vertical box for the content
     GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_margin_start(hbox, 10);
@@ -83,6 +115,18 @@ static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
     gtk_widget_set_visible(hbox, TRUE);
     gtk_widget_set_visible(name_label, TRUE);
     //gtk_widget_set_visible(details_label, TRUE);
+}
+
+// Add this row click handler function
+static void on_row_clicked(GtkListBox *box, GtkListBoxRow *row, gpointer user_data) {
+    if (!row || !row_click_callback) return;
+
+    // Get the mob data associated with this row
+    struct MobQueryData *mob_data = g_object_get_data(G_OBJECT(row), "mob-data");
+    if (!mob_data) return;
+
+    // Call the user's callback with the mob data
+    row_click_callback(mob_data, row_click_user_data);
 }
 
 void update_mob_list(const char *search_text) {
@@ -162,6 +206,7 @@ static MobListView* create_mob_list_view(void) {
     // Add the list box to the scrolled window
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(view->scrolled_window), view->list_box);
 
+    g_signal_connect(view->list_box, "row-activated", G_CALLBACK(on_row_clicked), NULL);
     return view;
 }
 

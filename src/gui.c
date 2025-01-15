@@ -1,6 +1,8 @@
 #include <gtk-4.0/gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "../include/sqlite_handler.h"
 #include "../include/gui.h"
 #include "../include/gui_utility.h"

@@ -6,7 +6,6 @@
 #include "../include/sqlite_handler.h"
 #include "glibconfig.h"
 
-
 typedef struct {
     GtkWidget *scrolled_window;
     GtkWidget *list_box;
@@ -41,80 +40,118 @@ static struct MobQueryData* copy_mob_data(const struct MobQueryData *src) {
 }
 
 static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
+    GtkWidget *picture;
+    
     // Store a copy of the mob data in the row
     struct MobQueryData *row_data = copy_mob_data(mob_data);
     g_object_set_data_full(G_OBJECT(row), "mob-data", row_data,
                           (GDestroyNotify)clear_search_result_data);
 
-
-    // Create a vertical box for the content
+    // Create a horizontal box for the content
     GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_margin_start(hbox, 10);
     gtk_widget_set_margin_end(hbox, 10);
     gtk_widget_set_margin_top(hbox, 5);
     gtk_widget_set_margin_bottom(hbox, 5);
 
-    GtkWidget *name_button = gtk_button_new();
-    GtkWidget *icon_button = gtk_button_new();
-    GtkWidget *health_button = gtk_button_new();
-    GtkWidget *height_button = gtk_button_new();
-    GtkWidget *class_button = gtk_button_new();
-    GtkWidget *behavior_button = gtk_button_new();
+    // Erstellen der Boxen mit fester Breite
+    GtkWidget *name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *icon_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *health_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *height_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *class_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *behavior_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *spawn_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
+    // Setzen fester Breiten für die Boxen
+    gtk_widget_set_size_request(name_box, 100, -1);
+    gtk_widget_set_size_request(icon_box, 70, 70);
+    gtk_widget_set_size_request(health_box, 80, -1);
+    gtk_widget_set_size_request(height_box, 80, -1);
+    gtk_widget_set_size_request(class_box, 100, -1);
+    gtk_widget_set_size_request(behavior_box, 120, -1);
+    gtk_widget_set_size_request(spawn_box, 100, -1);
+
+    // CSS-Klassen hinzufügen
+    gtk_widget_add_css_class(name_box, "data-box");
+    gtk_widget_add_css_class(icon_box, "data-box");
+    gtk_widget_add_css_class(health_box, "data-box");
+    gtk_widget_add_css_class(height_box, "data-box");
+    gtk_widget_add_css_class(class_box, "data-box");
+    gtk_widget_add_css_class(behavior_box, "data-box");
+    gtk_widget_add_css_class(spawn_box, "data-box");
+
+    // Set up icon
     char *base_path = return_folders_path();
     char full_path[strlen(base_path) + strlen(mob_data->picture_path) + 1];
     strcpy(full_path, base_path);
     strcat(full_path, mob_data->picture_path);
-    GtkWidget *icon = gtk_image_new_from_file(full_path);
+    
+    // Erstellen Sie das GFile mit dem vollständigen Pfad
+    GFile *file = g_file_new_for_path(full_path);
+    GError *error = NULL;
+    
+    if (error != NULL) {
+        g_printerr("Error loading image: %s\n", error->message);
+        g_error_free(error);
+        g_object_unref(file);
+        free(base_path);
+        return;
+    }
+    picture = gtk_picture_new_for_file(file);
+    gtk_widget_set_size_request(picture, 15, 15);
+    gtk_picture_set_keep_aspect_ratio(GTK_PICTURE(picture), TRUE);
+    
     printf("DEBUG: Icon_path: %s\n", full_path);
     free(base_path);
+
     // Create labels for mob information
     GtkWidget *name_label = gtk_label_new(mob_data->name);
-    printf("%s\n", mob_data->name);
     gtk_widget_set_halign(name_label, GTK_ALIGN_CENTER);
-    //gtk_label_set_markup(GTK_LABEL(name_label), g_markup_printf_escaped("<b>%s</b>", mob_data->name));
 
     GtkWidget *health_label = gtk_label_new(mob_data->health);
-    printf("%s\n", mob_data->name);
-    gtk_widget_set_halign(name_label, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(health_label, GTK_ALIGN_CENTER);
 
     GtkWidget *height_label = gtk_label_new(mob_data->height);
-    printf("%s\n", mob_data->name);
-    gtk_widget_set_halign(name_label, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(height_label, GTK_ALIGN_CENTER);
 
     GtkWidget *class_label = gtk_label_new(mob_data->class);
-    printf("%s\n", mob_data->name);
-    gtk_widget_set_halign(name_label, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(class_label, GTK_ALIGN_CENTER);
+
+    GtkWidget *spawn_label = gtk_label_new(mob_data->spawn);
+    gtk_widget_set_halign(spawn_label, GTK_ALIGN_CENTER);
 
     GtkWidget *behavior_label = gtk_label_new(mob_data->behavior);
-    printf("%s\n", mob_data->name);
-    gtk_widget_set_halign(name_label, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(behavior_label, GTK_ALIGN_CENTER);
 
-    gtk_button_set_child(GTK_BUTTON(name_button), name_label);
-    gtk_button_set_child(GTK_BUTTON(health_button), health_label);
-    gtk_button_set_child(GTK_BUTTON(height_button), height_label);
-    gtk_button_set_child(GTK_BUTTON(behavior_button), behavior_label);
-    gtk_button_set_child(GTK_BUTTON(class_button), class_label);
-    gtk_button_set_child(GTK_BUTTON(icon_button), icon);
+    // Add labels and picture to boxes
+    gtk_box_append(GTK_BOX(name_box), name_label);
+    gtk_box_append(GTK_BOX(health_box), health_label);
+    gtk_box_append(GTK_BOX(height_box), height_label);
+    gtk_box_append(GTK_BOX(behavior_box), behavior_label);
+    gtk_box_append(GTK_BOX(class_box), class_label);
+    gtk_box_append(GTK_BOX(spawn_box), spawn_label);
+    gtk_box_append(GTK_BOX(icon_box), picture);
 
-    printf("Version: \tHealth: \tHeight: \tClass: \n %s \t %s \t %s \t %s", mob_data->version, mob_data->health, mob_data->height, mob_data->class);
+    // Add boxes to the horizontal box
+    gtk_box_append(GTK_BOX(hbox), icon_box);
+    gtk_box_append(GTK_BOX(hbox), name_box);
+    gtk_box_append(GTK_BOX(hbox), health_box);
+    gtk_box_append(GTK_BOX(hbox), height_box);
+    gtk_box_append(GTK_BOX(hbox), behavior_box);
+    gtk_box_append(GTK_BOX(hbox), class_box);
+    gtk_box_append(GTK_BOX(hbox), spawn_box);
 
-    // Add labels to the vertical box
-    gtk_box_append(GTK_BOX(hbox), icon_button);
-    gtk_box_append(GTK_BOX(hbox), name_button);
-    gtk_box_append(GTK_BOX(hbox), health_button);
-    gtk_box_append(GTK_BOX(hbox), height_button);
-    gtk_box_append(GTK_BOX(hbox), behavior_button);
-    gtk_box_append(GTK_BOX(hbox), class_button);
-
-    // Set the vertical box as the child of the row
+    // Set the horizontal box as the child of the row
     gtk_list_box_row_set_child(row, hbox);
 
     // Make sure the row and its contents are visible
     gtk_widget_set_visible(GTK_WIDGET(row), TRUE);
     gtk_widget_set_visible(hbox, TRUE);
     gtk_widget_set_visible(name_label, TRUE);
-    //gtk_widget_set_visible(details_label, TRUE);
+
+    // Cleanup
+    g_object_unref(file);
 }
 
 // Add this row click handler function
@@ -196,9 +233,11 @@ static MobListView* create_mob_list_view(void) {
     // Style the list box
     GtkStyleContext *context = gtk_widget_get_style_context(view->list_box);
     GtkCssProvider *provider = gtk_css_provider_new();
-    const char *css = "list { background-color: rgba(255, 255, 255, 0.0); }"
-                     "row { background-color: rgba(255, 255, 255, 0.9); margin: 2px; border-radius: 5px; }"
-                     "label { color: rgb(0, 0, 0); }"; // Make sure text is visible
+    const char *css = 
+        "list { background-color: rgba(255, 255, 255, 0.0); }"
+        "row { background-color: rgba(255, 255, 255, 0.9); margin: 2px; border-radius: 5px; }"
+        ".icon-box { background-color: rgb(220, 220, 220); padding: 3px; }";
+
     gtk_css_provider_load_from_string(provider, css);
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     g_object_unref(provider);

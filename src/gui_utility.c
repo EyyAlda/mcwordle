@@ -213,7 +213,7 @@ GtkWidget* get_mob_list_box(void) {
     return global_mob_list_view ? global_mob_list_view->list_box : NULL;
 }
 
-static MobListView* create_mob_list_view(void) {
+static MobListView* create_mob_list_view(void) { 
     MobListView *view = g_new0(MobListView, 1);
 
     // Create a scrolled window

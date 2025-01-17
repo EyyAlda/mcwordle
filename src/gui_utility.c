@@ -14,6 +14,7 @@ typedef struct {
 static MobListView *global_mob_list_view = NULL;
 static MobRowClickCallback row_click_callback = NULL;
 static void *row_click_user_data = NULL;
+static MobListView *global_list = NULL;
 
 // Function to set the click handler
 void set_row_click_handler(MobRowClickCallback callback, void *user_data) {
@@ -118,8 +119,14 @@ static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
     GtkWidget *class_label = gtk_label_new(mob_data->class);
     gtk_widget_set_halign(class_label, GTK_ALIGN_CENTER);
 
+    GtkWidget *behavior_label = gtk_label_new(mob_data->behavior);
+    gtk_widget_set_halign(behavior_label, GTK_ALIGN_CENTER);
+
+    printf("Version: \tHealth: \tHeight: \tClass: \n %s \t\t %s \t\t %s \t\t %s\n", mob_data->version, mob_data->health, mob_data->height, mob_data->class);
+  
     GtkWidget *spawn_label = gtk_label_new(mob_data->spawn);
     gtk_widget_set_halign(spawn_label, GTK_ALIGN_CENTER);
+
 
     GtkWidget *behavior_label = gtk_label_new(mob_data->behavior);
     gtk_widget_set_halign(behavior_label, GTK_ALIGN_CENTER);
@@ -157,6 +164,7 @@ static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
 // Add this row click handler function
 static void on_row_clicked(GtkListBox *box, GtkListBoxRow *row, gpointer user_data) {
     if (!row || !row_click_callback) return;
+    g_print("DEBUG: on_row_clicked\n");
 
     // Get the mob data associated with this row
     struct MobQueryData *mob_data = g_object_get_data(G_OBJECT(row), "mob-data");
@@ -166,6 +174,31 @@ static void on_row_clicked(GtkListBox *box, GtkListBoxRow *row, gpointer user_da
     row_click_callback(mob_data, row_click_user_data);
 }
 
+/**fügt ausgewählte mobs zur Wordle-Liste hinzu
+ */
+void add_to_list(struct MobQueryData *data) {
+    g_print("DEBUG: adding entry: %s\n", data->name);
+
+    if (!global_list || !global_list->list_box) {
+        g_print("Error: List view not initialized\n");
+        return;
+    }
+
+    g_print("DEBUG: creating row\n");
+    GtkWidget *row = gtk_list_box_row_new();
+    g_print("DEBUG: setting up row\n");
+    setup_mob_row(GTK_LIST_BOX_ROW(row), data);
+    g_print("DEBUG: appending row to list\n");
+    gtk_list_box_append(GTK_LIST_BOX(global_list->list_box), row);
+    
+    
+    g_print("DEBUG: redrawing list\n");
+    // Queue a redraw
+    gtk_widget_queue_draw(global_list->scrolled_window);
+}
+
+/**läd Suchergebnisse in eine Liste
+ */
 void update_mob_list(const char *search_text) {
     g_print("Updating mob list with search text: %s\n", search_text);
 
@@ -251,9 +284,48 @@ static MobListView* create_mob_list_view(void) {
 
 void cleanup_mob_list_view(void) {
     if (global_mob_list_view) {
+        g_print("DEBUG: (utility) freeing global_mob_list_view\n");
         g_free(global_mob_list_view);
         global_mob_list_view = NULL;
     }
+    if (global_list) {
+        g_print("DEBUG: (utility) freeing global_list\n");
+        g_free(global_list);
+        global_list = NULL;
+    }
+}
+
+static MobListView* create_list(void) {
+    MobListView *view = g_new0(MobListView, 1);
+
+    // Create a scrolled window
+    view->scrolled_window = gtk_scrolled_window_new();
+    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(view->scrolled_window), 400);
+    gtk_widget_set_hexpand(view->scrolled_window, TRUE);
+    gtk_widget_set_vexpand(view->scrolled_window, TRUE);
+
+    // Create the list box
+    view->list_box = gtk_list_box_new();
+    gtk_list_box_set_selection_mode(GTK_LIST_BOX(view->list_box), GTK_SELECTION_SINGLE);
+
+    // Make sure widgets are visible
+    gtk_widget_set_visible(view->list_box, TRUE);
+    gtk_widget_set_visible(view->scrolled_window, TRUE);
+
+    // Style the list box
+    GtkStyleContext *context = gtk_widget_get_style_context(view->list_box);
+    GtkCssProvider *provider = gtk_css_provider_new();
+    const char *css = "list { background-color: rgba(255, 255, 255, 0.0); }"
+                     "row { background-color: rgba(255, 255, 255, 0.9); margin: 2px; border-radius: 5px; }"
+                     "label { color: rgb(0, 0, 0); }"; // Make sure text is visible
+    gtk_css_provider_load_from_string(provider, css);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    g_object_unref(provider);
+
+    // Add the list box to the scrolled window
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(view->scrolled_window), view->list_box);
+
+    return view;
 }
 
 GtkWidget* add_list_to_overlay(GtkOverlay *overlay) {
@@ -276,4 +348,30 @@ GtkWidget* add_list_to_overlay(GtkOverlay *overlay) {
     update_mob_list("aösdlkfjalkdjf");
 
     return global_mob_list_view->scrolled_window;
+
 }
+
+void clear_list(){
+    if (global_list) {
+        GtkWidget *child;
+        while ((child = gtk_widget_get_first_child(GTK_WIDGET(global_list->list_box))) != NULL) {
+            gtk_list_box_remove(GTK_LIST_BOX(global_list->list_box), child);
+        }
+    }
+}
+
+GtkWidget* add_list_to_box(GtkBox *box){
+    if (!global_list){
+        global_list = create_list();
+    }
+
+    gtk_box_append(box, global_list->scrolled_window);
+
+    gtk_widget_set_size_request(global_list->scrolled_window, 300, 400);
+
+    gtk_widget_set_visible(global_list->scrolled_window, TRUE);
+    gtk_widget_set_visible(global_list->list_box, TRUE);
+
+    return global_list->scrolled_window;
+}
+

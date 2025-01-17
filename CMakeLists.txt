@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project configuration
-project(MCWordle LANGUAGES C)
+project(mcwordle LANGUAGES C)
 
 # Set C standard and compile flags
 set(CMAKE_C_STANDARD 11)
@@ -79,6 +79,29 @@ else()
         ${GLIB_INCLUDE_DIRS}
     )
 endif()
+
+# Add installation rules
+install(TARGETS mcwordle
+        RUNTIME DESTINATION bin
+)
+
+# If you have any resources (like databases, CSS, etc.), install them too
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/data/
+        DESTINATION share/mcwordle/data
+        FILES_MATCHING PATTERN "*.css"
+                       PATTERN "*.db"
+                       PATTERN "*.png"
+)
+
+# Install desktop file if you have one
+install(FILES ${CMAKE_SOURCE_DIR}/data/mcwordle.desktop
+        DESTINATION share/applications
+)
+
+# Install icons if you have them
+install(FILES ${CMAKE_SOURCE_DIR}/data/icons/mcwordle.png
+        DESTINATION share/icons/hicolor/256x256/apps
+)
 
 # Print compiler information for debugging
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")

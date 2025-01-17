@@ -12,6 +12,7 @@ GtkWidget *app_stack;
 GtkWidget *search_results;
 GtkWidget *item_container;
 GtkWidget *search_entry;
+GtkWidget *list_container;
 struct MobQueryData *random_Mob;
 
 int is_initialized = 0;
@@ -28,6 +29,7 @@ void on_start_Block_button_click(GtkWidget *widget, gpointer user_data){
 void on_end_button_click(GtkWidget *widget, gpointer user_data){
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
     free(random_Mob);
+    clear_list();
 }
 
 GtkWidget *create_main_menu(){
@@ -96,6 +98,7 @@ void search_row_click_handler(struct MobQueryData *mob_data, void *user_data){
     if (!mob_data) return;
     printf("row_clicked %s\n", mob_data->name);
     gtk_editable_set_text(GTK_EDITABLE(search_entry), "");
+    add_to_list(mob_data);
 }
 
 /*GtkWidget *create_mob_container(){
@@ -138,9 +141,11 @@ static void on_search(GtkEditable *editable, gpointer user_data) {
       update_mob_list(text);
       g_print("DEBUG: loaded search results\n");
       gtk_widget_set_visible(item_container, FALSE);
+      gtk_widget_set_visible(list_container, FALSE);
   } else {
       update_mob_list("adsfladskjfghaldsfkjghls");
-        gtk_widget_set_visible(item_container , TRUE);
+      gtk_widget_set_visible(item_container, TRUE);
+      gtk_widget_set_visible(list_container, TRUE);
   }
   g_print("text changed: %s\n", text);
 }
@@ -174,23 +179,27 @@ GtkWidget *create_game_panel(){
     GtkWidget *button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     //GtkWidget *search_bar = gtk_search_bar_new();
     GtkWidget *search_bar_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    list_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     search_entry = gtk_search_entry_new();
 
     gtk_overlay_set_child(GTK_OVERLAY(overlay), background);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), item_container);
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), list_container);
     add_list_to_overlay(GTK_OVERLAY(overlay));
+    add_list_to_box(GTK_BOX(list_container));
+    
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), search_bar_container);
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), button_container);
 
     set_row_click_handler(search_row_click_handler, NULL);
 
-    gtk_box_append(GTK_BOX(item_container),mop_button);
-    gtk_box_append(GTK_BOX(item_container),version_button);
-    gtk_box_append(GTK_BOX(item_container),hp_button);
-    gtk_box_append(GTK_BOX(item_container),height_button);
-    gtk_box_append(GTK_BOX(item_container),behavior_button);
-    gtk_box_append(GTK_BOX(item_container),spawn_button);
-    gtk_box_append(GTK_BOX(item_container),class_button);
+    gtk_box_append(GTK_BOX(item_container), mop_button);
+    gtk_box_append(GTK_BOX(item_container), version_button);
+    gtk_box_append(GTK_BOX(item_container), hp_button);
+    gtk_box_append(GTK_BOX(item_container), height_button);
+    gtk_box_append(GTK_BOX(item_container), behavior_button);
+    gtk_box_append(GTK_BOX(item_container), spawn_button);
+    gtk_box_append(GTK_BOX(item_container), class_button);
 
     gtk_widget_set_halign(GTK_WIDGET(search_results), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(search_results), GTK_ALIGN_START);
@@ -252,8 +261,14 @@ GtkWidget *create_game_panel(){
 
 void on_destroy(GtkWidget *window, gpointer user_data){
     //unref_mob_data();
+    g_print("DEBUG: running on_destroy\n");
+
+    g_print("DEBUG: clearing the list if necessary\n");
+    clear_list();
+
+    g_print("DEBUG: removing the data of the lists\n");
     cleanup_mob_list_view();
-    free(random_Mob);
+    if (random_Mob) free(random_Mob);
     g_print("DEBUG: ran on_destroy\n");
 }
 

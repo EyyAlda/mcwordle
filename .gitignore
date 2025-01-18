@@ -35,6 +35,9 @@
 *.i*86
 *.x86_64
 *.hex
+*.flatpak
+*.snap
+*.deb
 
 # Debug files
 *.dSYM/
@@ -59,7 +62,16 @@ dkms.conf
 build/
 
 .cache/
+
+# files, that shouldn't be on Github
 *.db
+*.png
+*.webp
+*.jpeg
+*.jpg
+*.svg
+
+manifest.yml
 
 Background/
 Bilder/
@@ -69,3 +81,7 @@ Block_Pics/
 
 snap/
 data/
+"Block Pics/"
+Bilder/
+resources/
+.flatpak-builder/

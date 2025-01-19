@@ -101,7 +101,7 @@ static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
     }
     picture = gtk_picture_new_for_file(file);
     gtk_widget_set_size_request(picture, 15, 15);
-    gtk_picture_set_keep_aspect_ratio(GTK_PICTURE(picture), TRUE);
+    gtk_picture_set_content_fit(GTK_PICTURE(picture), GTK_CONTENT_FIT_CONTAIN);
     
     printf("DEBUG: Icon_path: %s\n", full_path);
     free(base_path);
@@ -126,10 +126,6 @@ static void setup_mob_row(GtkListBoxRow *row, struct MobQueryData *mob_data) {
   
     GtkWidget *spawn_label = gtk_label_new(mob_data->spawn);
     gtk_widget_set_halign(spawn_label, GTK_ALIGN_CENTER);
-
-
-    GtkWidget *behavior_label = gtk_label_new(mob_data->behavior);
-    gtk_widget_set_halign(behavior_label, GTK_ALIGN_CENTER);
 
     // Add labels and picture to boxes
     gtk_box_append(GTK_BOX(name_box), name_label);
@@ -263,18 +259,6 @@ static MobListView* create_mob_list_view(void) {
     gtk_widget_set_visible(view->list_box, TRUE);
     gtk_widget_set_visible(view->scrolled_window, TRUE);
 
-    // Style the list box
-    GtkStyleContext *context = gtk_widget_get_style_context(view->list_box);
-    GtkCssProvider *provider = gtk_css_provider_new();
-    const char *css = 
-        "list { background-color: rgba(255, 255, 255, 0.0); }"
-        "row { background-color: rgba(255, 255, 255, 0.9); margin: 2px; border-radius: 5px; }"
-        ".icon-box { background-color: rgb(220, 220, 220); padding: 3px; }";
-
-    gtk_css_provider_load_from_string(provider, css);
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    g_object_unref(provider);
-
     // Add the list box to the scrolled window
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(view->scrolled_window), view->list_box);
 
@@ -311,16 +295,6 @@ static MobListView* create_list(void) {
     // Make sure widgets are visible
     gtk_widget_set_visible(view->list_box, TRUE);
     gtk_widget_set_visible(view->scrolled_window, TRUE);
-
-    // Style the list box
-    GtkStyleContext *context = gtk_widget_get_style_context(view->list_box);
-    GtkCssProvider *provider = gtk_css_provider_new();
-    const char *css = "list { background-color: rgba(255, 255, 255, 0.0); }"
-                     "row { background-color: rgba(255, 255, 255, 0.9); margin: 2px; border-radius: 5px; }"
-                     "label { color: rgb(0, 0, 0); }"; // Make sure text is visible
-    gtk_css_provider_load_from_string(provider, css);
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    g_object_unref(provider);
 
     // Add the list box to the scrolled window
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(view->scrolled_window), view->list_box);

@@ -1,8 +1,6 @@
 #include <gtk-4.0/gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "../include/sqlite_handler.h"
 #include "../include/gui.h"
 #include "../include/gui_utility.h"
@@ -43,8 +41,10 @@ GtkWidget *create_main_menu(){
     fprintf(stdout, "2\n");
     strcat(background_path, "/Background/download.webp");
 
+    if (does_file_exist(background_path)) g_print("DEBUG: Main Menu background found\n");
+
     free(path);
-    fprintf(stdout, "DEBUG: Background: %s", background_path);
+    fprintf(stdout, "DEBUG: Background: %s\n", background_path);
 
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *overlay = gtk_overlay_new();
@@ -160,8 +160,10 @@ GtkWidget *create_game_panel(){
     fprintf(stdout, "2\n");
     strcat(background_path, "/Background/background2.webp");
 
+    if (does_file_exist(background_path)) g_print("DEBUG: Game Panel background found\n");
+
     free(path);
-    fprintf(stdout, "DEBUG: Background: %s", background_path);
+    fprintf(stdout, "DEBUG: Background: %s\n", background_path);
 
     GtkWidget *overlay = gtk_overlay_new();
     GtkWidget *background = gtk_picture_new_for_filename(background_path);
@@ -296,19 +298,31 @@ void on_activate(GtkApplication *app, gpointer user_data){
     gtk_stack_add_named(GTK_STACK(app_stack), game_panel, "game-panel");
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
 
-    char *base_path = return_folders_path();
 
-    char css_path[strlen(base_path) + strlen("/styles.css") + 1];
 
-    strcpy(css_path, base_path);
-    strcat(css_path, "/styles.css");
 
-    free(base_path);
 
     GtkCssProvider *provider = gtk_css_provider_new();
 
+
+    char *css_path;
+
+#ifdef FLATPAK_BUILD
+
+    const char *datadir = g_get_user_data_dir();
+    css_path = g_build_filename(datadir, "share", "mcwordle", "styles", "styles.css", NULL);
+
+#else
+    
+    css_path = g_build_filename("..", "resources", "styles", "styles.css", NULL);
+
+#endif
+
     gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider), css_path);
 
+    gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    g_free(css_path);
     g_object_unref(provider);
 
     gtk_window_set_child(GTK_WINDOW(window), app_stack);

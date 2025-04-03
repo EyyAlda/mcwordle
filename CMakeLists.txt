@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project configuration
-project(MCWordle LANGUAGES C)
+project(mcwordle LANGUAGES C)
 
 # Set C standard and compile flags
 set(CMAKE_C_STANDARD 11)
@@ -14,12 +14,15 @@ add_executable(${PROJECT_NAME}
     src/main.c
     src/get_files_path.c
     src/gui.c
-    src/game.c
+    # src/game.c
+    src/gui_utility.c
+    src/sqlite_handler.c
 )
 
 # Find GTK4 and GLib using PkgConfig
 find_package(PkgConfig REQUIRED)
 find_package(SQLite3 REQUIRED)
+
 
 # Platform-specific configuration
 if(WIN32)
@@ -54,6 +57,15 @@ if(WIN32)
         SQLite::SQLite3
     )
 else()
+    
+    option(FLATPAK_BUILD "Build for Flatpak" OFF)
+
+    if(FLATPAK_BUILD)
+        message(STATUS "Building for Flatpak")
+        install(FILES resources/styles/styles.css DESTINATION share/${PROJECT_NAME}/styles)
+    else()
+        message(STATUS "Building normal Package")
+    endif()
     # For Linux and other platforms
     message(STATUS "Configuring for Unix-like systems")
 
@@ -78,6 +90,29 @@ else()
     )
 endif()
 
+# Add installation rules
+install(TARGETS mcwordle
+        RUNTIME DESTINATION bin
+)
+
 # Print compiler information for debugging
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "C Flags: ${CMAKE_C_FLAGS}")
+
+# If you have any resources (like databases, CSS, etc.), install them too
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/data/
+#        DESTINATION share/mcwordle/data
+#        FILES_MATCHING PATTERN "*.css"
+#                       PATTERN "*.db"
+#                       PATTERN "*.png"
+#)
+
+# Install desktop file if you have one
+#install(FILES ${CMAKE_SOURCE_DIR}/data/net.mcwordle.game.desktop
+#        DESTINATION share/applications
+#)
+
+# Install icons if you have them
+#install(FILES ${CMAKE_SOURCE_DIR}/data/icons/net.mcwordle.game.png
+#        DESTINATION share/icons/hicolor/256x256/apps
+#)

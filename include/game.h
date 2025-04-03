@@ -2,14 +2,14 @@
 #define GAME_H
 
 typedef struct {
-    char name[50];
-    char version[20];
+    char *name;
+    char *version;
     float height;
     int behavior;
-    char spawn[100];
+    char *spawn;
     int class;
     int health;
-    char picture_path[100];
+    char *picture_path;
 } MinecraftMob;
 
 typedef struct {
@@ -17,7 +17,16 @@ typedef struct {
 
 } MinecraftBlock;
 
+struct MobDataAccess{
+    MinecraftMob *mob_data_pointer;
+    struct MobDataAccess *next;
+};
 
 int array();
 
+int get_mob_counter();
+
+char ***get_mob_data();
+
+int unref_mob_data();
 #endif

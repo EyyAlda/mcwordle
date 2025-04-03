@@ -357,7 +357,7 @@ void on_activate(GtkApplication *app, gpointer user_data){
 
 #else
     
-    css_path = g_build_filename("..", "resources", "styles", "styles.css", NULL);
+    css_path = g_build_filename(".", "resources", "styles", "styles.css", NULL);
 
 #endif
 

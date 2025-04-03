@@ -17,7 +17,9 @@ GArray *chosen_mobs;
 int is_initialized = 0;
 
 void on_start_Mop_button_click(GtkWidget *widget, gpointer user_data){
+    chosen_mobs = g_array_new(FALSE, FALSE, sizeof(char*));
     random_Mob = select_random_Mob();
+    gtk_widget_set_visible(search_entry, TRUE);
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "game-panel");
 }
 void on_start_Block_button_click(GtkWidget *widget, gpointer user_data){
@@ -104,6 +106,13 @@ GtkWidget *create_main_menu(){
     return container;
 }
 
+void check_if_won(struct MobQueryData *mob_data){
+    if (!strcmp(mob_data->name, random_Mob->name)) {
+        g_print("Congrats! You've won!");
+        gtk_widget_set_visible(search_entry, FALSE);
+    }
+
+}
 
 void search_row_click_handler(struct MobQueryData *mob_data, void *user_data){
     int already_exists = 0;
@@ -127,6 +136,7 @@ void search_row_click_handler(struct MobQueryData *mob_data, void *user_data){
         char *mob = strdup(mob_data->name);
         g_array_append_val(chosen_mobs, mob);
         add_to_list(mob_data);
+        check_if_won(mob_data);
     } else {
         g_print("Mob already added to the list\n");
     }
@@ -185,7 +195,6 @@ GtkWidget *create_game_panel(){
     fprintf(stdout, "0\n");
     char *path = return_folders_path();
 
-    chosen_mobs = g_array_new(FALSE, FALSE, sizeof(char*));
 
     char background_path[strlen(path) + strlen("/Background/background2.webp") + 1];
     fprintf(stdout, "1\n");

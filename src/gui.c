@@ -12,21 +12,33 @@ GtkWidget *item_container;
 GtkWidget *search_entry;
 GtkWidget *list_container;
 struct MobQueryData *random_Mob;
+GArray *chosen_mobs;
 
 int is_initialized = 0;
 
 void on_start_Mop_button_click(GtkWidget *widget, gpointer user_data){
+    chosen_mobs = g_array_new(FALSE, FALSE, sizeof(char*));
     random_Mob = select_random_Mob();
+    gtk_widget_set_visible(search_entry, TRUE);
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "game-panel");
 }
 void on_start_Block_button_click(GtkWidget *widget, gpointer user_data){
 
 }
 
+void free_string_array(GArray *array) {
+    for(guint i = 0; i < array->len; i++) {
+        g_free(g_array_index(array, char *, i));
+    }
+    g_array_free(array, TRUE);
+}
 
 void on_end_button_click(GtkWidget *widget, gpointer user_data){
     gtk_stack_set_visible_child_name(GTK_STACK(app_stack), "main-menu");
     free(random_Mob);
+    random_Mob = NULL;
+    free_string_array(chosen_mobs);
+    chosen_mobs = NULL;
     clear_list();
 }
 
@@ -94,11 +106,40 @@ GtkWidget *create_main_menu(){
     return container;
 }
 
+void check_if_won(struct MobQueryData *mob_data){
+    if (!strcmp(mob_data->name, random_Mob->name)) {
+        g_print("Congrats! You've won!");
+        gtk_widget_set_visible(search_entry, FALSE);
+    }
+
+}
+
 void search_row_click_handler(struct MobQueryData *mob_data, void *user_data){
+    int already_exists = 0;
     if (!mob_data) return;
     printf("row_clicked %s\n", mob_data->name);
-    gtk_editable_set_text(GTK_EDITABLE(search_entry), "");
-    add_to_list(mob_data);
+
+
+    // check if a mob is already added to the list
+    for (guint i = 0; i < chosen_mobs->len; i++) {
+        char *mob = g_array_index(chosen_mobs, char*, i);
+        g_print("Mob at index %d: %s\n", i, mob);
+        already_exists = strcmp(mob_data->name, mob);
+        already_exists = !already_exists;
+        g_print("Already exists: %d\n", already_exists);
+        // if we found a match, there is no need to search for more
+        if (already_exists) break;
+    }
+
+    if (!already_exists){
+        gtk_editable_set_text(GTK_EDITABLE(search_entry), "");
+        char *mob = strdup(mob_data->name);
+        g_array_append_val(chosen_mobs, mob);
+        add_to_list(mob_data);
+        check_if_won(mob_data);
+    } else {
+        g_print("Mob already added to the list\n");
+    }
 }
 
 /*GtkWidget *create_mob_container(){
@@ -153,6 +194,7 @@ static void on_search(GtkEditable *editable, gpointer user_data) {
 GtkWidget *create_game_panel(){
     fprintf(stdout, "0\n");
     char *path = return_folders_path();
+
 
     char background_path[strlen(path) + strlen("/Background/background2.webp") + 1];
     fprintf(stdout, "1\n");
@@ -271,6 +313,7 @@ void on_destroy(GtkWidget *window, gpointer user_data){
     g_print("DEBUG: removing the data of the lists\n");
     cleanup_mob_list_view();
     if (random_Mob) free(random_Mob);
+    if (chosen_mobs) free_string_array(chosen_mobs);
     g_print("DEBUG: ran on_destroy\n");
 }
 

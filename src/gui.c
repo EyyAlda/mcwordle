@@ -1,6 +1,7 @@
 #include <gtk-4.0/gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fontconfig/fontconfig.h>
 #include "../include/sqlite_handler.h"
 #include "../include/gui.h"
 #include "../include/gui_utility.h"
@@ -135,7 +136,7 @@ void search_row_click_handler(struct MobQueryData *mob_data, void *user_data){
         gtk_editable_set_text(GTK_EDITABLE(search_entry), "");
         char *mob = strdup(mob_data->name);
         g_array_append_val(chosen_mobs, mob);
-        add_to_list(mob_data);
+        add_to_list(mob_data, random_Mob);
         check_if_won(mob_data);
     } else {
         g_print("Mob already added to the list\n");
@@ -317,6 +318,11 @@ void on_destroy(GtkWidget *window, gpointer user_data){
     g_print("DEBUG: ran on_destroy\n");
 }
 
+/*GtkWidget *create_init_panel() {
+
+}
+*/
+
 void on_activate(GtkApplication *app, gpointer user_data){
 
     // Check if we already have a window
@@ -330,6 +336,7 @@ void on_activate(GtkApplication *app, gpointer user_data){
     app_stack = gtk_stack_new();
     GtkWidget *main_menu = create_main_menu();
     GtkWidget *game_panel = create_game_panel();
+    //GtkWidget *init_panel = create_init_panel();
 
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
     gtk_stack_set_transition_type(GTK_STACK(app_stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
@@ -357,7 +364,10 @@ void on_activate(GtkApplication *app, gpointer user_data){
 
 #else
     
-    css_path = g_build_filename(".", "resources", "styles", "styles.css", NULL);
+    char *base_path = return_folders_path();
+    css_path = g_build_filename(base_path, "resources", "styles", "styles.css", NULL);
+    printf("%s\n", css_path);
+    free(base_path);
 
 #endif
 

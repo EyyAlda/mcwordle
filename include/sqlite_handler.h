@@ -17,4 +17,6 @@ struct MobQueryData {
 struct MobQueryData* get_search_results(const char *text);
 int clear_search_result_data(struct MobQueryData* mob_query_data);
 struct MobQueryData* select_random_Mob();
+int flexible_match_case_insensitive(const char *haystack, const char *needle);
+
 #endif

@@ -12,7 +12,7 @@ GtkWidget* add_list_to_overlay(GtkOverlay *overlay);
 
 GtkWidget* add_list_to_box(GtkBox *box);
 
-void add_to_list(struct MobQueryData *data);
+void add_to_list(struct MobQueryData *data, struct MobQueryData *target_mob);
 
 void clear_list();
 
